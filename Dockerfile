@@ -4,6 +4,9 @@ FROM node:20-slim
 # Set working directory
 WORKDIR /usr/src/app
 
+# Install OpenSSL and other required dependencies for Prisma
+RUN apt-get update && apt-get install -y openssl
+
 # Install pnpm globally
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -14,9 +17,13 @@ COPY pnpm-lock.yaml ./
 COPY package.json ./
 COPY .babelrc ./
 COPY jsconfig.json ./
+COPY prisma ./prisma/
 
 # Install all dependencies (including devDependencies for building)
 RUN pnpm install
+
+# Generate Prisma Client
+RUN pnpm prisma generate
 
 # Copy source code
 COPY . .
@@ -34,5 +41,11 @@ ENV PORT=3001
 # Expose the port the app runs on
 EXPOSE 3001
 
-# Start the application
-CMD ["pnpm", "start"]
+# Create a script to handle startup tasks
+RUN echo '#!/bin/sh\n\
+    pnpm prisma migrate deploy\n\
+    pnpm start' > /usr/src/app/start.sh && \
+    chmod +x /usr/src/app/start.sh
+
+# Start the application using the startup script
+CMD ["/usr/src/app/start.sh"]
