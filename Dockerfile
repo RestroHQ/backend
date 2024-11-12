@@ -9,15 +9,23 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy pnpm specific files
+# Copy configuration files first
 COPY pnpm-lock.yaml ./
 COPY package.json ./
+COPY .babelrc ./
+COPY jsconfig.json ./
 
-# Install dependencies using pnpm
+# Install all dependencies (including devDependencies for building)
 RUN pnpm install
 
 # Copy source code
 COPY . .
+
+# Build using Babel
+RUN pnpm run build
+
+# Remove dev dependencies after build
+RUN pnpm prune --prod
 
 # Set environment variables
 ENV NODE_ENV=production
