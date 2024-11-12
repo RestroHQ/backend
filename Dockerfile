@@ -14,25 +14,17 @@ COPY pnpm-lock.yaml ./
 COPY package.json ./
 
 # Install dependencies using pnpm
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install
 
 # Copy source code
 COPY . .
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3000
-
-# Create a non-root user for security
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 --ingroup nodejs nodeuser && \
-    chown -R nodeuser:nodejs /usr/src/app
-
-# Switch to non-root user
-USER nodeuser
+ENV PORT=3001
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 3001
 
 # Start the application
 CMD ["pnpm", "start"]
