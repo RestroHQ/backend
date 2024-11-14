@@ -14,7 +14,8 @@ export const loginUser = async (req, res) => {
     const result = await authService.login(req.validatedData);
     res.status(200).json(result);
   } catch (error) {
-    res.status(401).json({ error: error.message });
+    console.log(error);
+    res.status(400).json({ error: error.message });
   }
 };
 

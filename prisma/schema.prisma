@@ -32,8 +32,8 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  Restaurant Restaurant[]
-  Staff      Staff[]
+  restaurant Restaurant[]
+  staff      Staff[]
 }
 
 model Restaurant {
