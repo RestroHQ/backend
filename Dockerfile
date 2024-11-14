@@ -23,7 +23,7 @@ COPY prisma ./prisma/
 RUN pnpm install
 
 # Generate Prisma Client
-RUN pnpm prisma generate
+RUN pnpm dlx prisma generate
 
 # Copy source code
 COPY . .
@@ -42,10 +42,7 @@ ENV PORT=3001
 EXPOSE 3001
 
 # Create a script to handle startup tasks
-RUN echo '#!/bin/sh\n\
-    pnpm prisma migrate deploy\n\
-    pnpm start' > /usr/src/app/start.sh && \
-    chmod +x /usr/src/app/start.sh
+RUN pnpm dlx prisma migrate deploy
 
-# Start the application using the startup script
-CMD ["/usr/src/app/start.sh"]
+# Start the application
+CMD ["pnpm", "start"]

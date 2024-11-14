@@ -1,3 +1,4 @@
+import { config } from "@/utils/config";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -19,17 +20,17 @@ export const register = async (data) => {
     data: {
       ...data,
       password: hashedPassword,
-      role: "USER",
     },
   });
 
   const { password, ...userWithoutPassword } = user;
+
   return userWithoutPassword;
 };
 
 export const login = async (data) => {
   const user = await prisma.user.findUnique({
-    where: { email: data.email },
+    where: { email: data.email, isActive: true, deletedAt: null },
   });
 
   if (!user) {
@@ -41,11 +42,9 @@ export const login = async (data) => {
     throw new Error("Invalid credentials");
   }
 
-  const token = jwt.sign(
-    { userId: user.id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: "24h" },
-  );
+  const token = jwt.sign({ userId: user.id }, config.JWT_SECRET, {
+    expiresIn: config.JWT_EXPIRES_IN,
+  });
 
   const { password, ...userWithoutPassword } = user;
   return { user: userWithoutPassword, token };

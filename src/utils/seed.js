@@ -1,45 +1,92 @@
-// prisma/seed.js
 import bcrypt from "bcryptjs";
-import { config } from "./config";
 import { prisma } from "./prisma";
 
-export const createSuperAdmin = async () => {
+export const seedDatabase = async () => {
   try {
-    const existingAdmin = await prisma.user.findUnique({
-      where: {
-        email: config.SUPER_ADMIN_EMAIL || "superadmin@restrohq.tech",
-      },
+    const password = await bcrypt.hash("restrohq", 10);
+    let owner, admin, restaurant;
+
+    owner = await prisma.user.findUnique({
+      where: { email: "john@restrohq.live" },
     });
 
-    if (existingAdmin) {
-      console.log("Super admin already exists, skipping creation.");
-      return;
+    if (!owner) {
+      owner = await prisma.user.create({
+        data: {
+          name: "John Doe",
+          email: "john@restrohq.live",
+          password,
+          phone: "+1234567890",
+        },
+      });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      config.SUPER_ADMIN_PASSWORD || "supersecret",
-      10,
-    );
-
-    const superAdmin = await prisma.user.create({
-      data: {
-        name: "Super Admin",
-        username: "superadmin",
-        email: config.SUPER_ADMIN_EMAIL || "superadmin@restrohq.tech",
-        password: hashedPassword,
-        role: "SUPERADMIN",
+    admin = await prisma.user.findUnique({
+      where: {
+        email: "jane@restrohq.live",
       },
     });
 
-    console.log("Super admin created successfully:", {
-      id: superAdmin.id,
-      email: superAdmin.email,
-      role: superAdmin.role,
+    if (!admin) {
+      admin = await prisma.user.create({
+        data: {
+          name: "Jane Smith",
+          email: "jane@restrohq.live",
+          password,
+          phone: "+1234567891",
+        },
+      });
+    }
+
+    restaurant = await prisma.restaurant.findUnique({
+      where: {
+        email: "info@goodfood.com",
+      },
     });
+
+    if (!restaurant) {
+      restaurant = await prisma.restaurant.create({
+        data: {
+          name: "The Good Food Place",
+          address: "123 Main St, City",
+          phone: "+1234567892",
+          email: "info@goodfood.com",
+          website: "https://goodfood.com",
+          cuisineType: "International",
+          openingTime: "09:00",
+          closingTime: "22:00",
+          openDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+          ],
+          capacity: 100,
+          description: "A cozy restaurant serving international cuisine",
+          ownerId: owner.id,
+        },
+      });
+
+      await prisma.staff.createMany({
+        data: [
+          {
+            userId: owner.id,
+            restaurantId: restaurant.id,
+            role: "SUPERADMIN",
+          },
+          {
+            userId: admin.id,
+            restaurantId: restaurant.id,
+            role: "ADMIN",
+          },
+        ],
+      });
+    }
+
+    console.log("Seed data created successfully");
   } catch (error) {
-    console.error("Error creating super admin:", error);
-    process.exit(1);
-  } finally {
-    await prisma.$disconnect();
+    console.error("Error seeding data", error);
   }
 };

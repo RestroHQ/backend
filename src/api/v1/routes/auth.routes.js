@@ -6,7 +6,6 @@ import {
 import { authenticate, authorize } from "@/api/v1/middlewares/auth.middleware";
 import { validateRequest } from "@/api/v1/middlewares/validate.middleware";
 import { loginSchema, registerSchema } from "@/api/v1/schemas/auth.schema";
-
 import { Router } from "express";
 
 export const router = Router();
