@@ -31,6 +31,14 @@ export const register = async (data) => {
 export const login = async (data) => {
   const user = await prisma.user.findUnique({
     where: { email: data.email, isActive: true, deletedAt: null },
+    include: {
+      staff: {
+        select: {
+          restaurantId: true,
+          role: true,
+        },
+      },
+    },
   });
 
   if (!user) {
@@ -46,6 +54,10 @@ export const login = async (data) => {
     expiresIn: config.JWT_EXPIRES_IN,
   });
 
-  const { password, ...userWithoutPassword } = user;
-  return { user: userWithoutPassword, token };
+  const { id, email, staff } = user;
+
+  return {
+    user: { id, email, restaurants: staff },
+    token,
+  };
 };
