@@ -1,6 +1,6 @@
 import { config } from "@/lib/config";
-import { saveUserFile } from "@/utils/file";
-import { prisma } from "@/utils/prisma";
+import { saveUserFile } from "@/lib/files";
+import { prisma } from "@/lib/prisma";
 import { createId } from "@paralleldrive/cuid2";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -22,7 +22,7 @@ export const register = async (data) => {
 
   const userId = createId();
 
-  const salt = await bcrypt.genSalt(config.SALT_ROUNDS);
+  const salt = await bcrypt.genSalt(parseInt(config.SALT_ROUNDS));
   const hashedPassword = await bcrypt.hash(data.password, salt);
 
   let imagePath = null;
