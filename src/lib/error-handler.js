@@ -1,7 +1,7 @@
 import { config } from "./config";
 import { fromError } from "zod-validation-error";
 
-export const errorHandler = (error, res) => {
+export const errorHandler = (code = 400, message, res) => {
   let type = "Unknown Error";
   let messages = [];
 
@@ -21,5 +21,5 @@ export const errorHandler = (error, res) => {
   if (config.NODE_ENV === "development") {
     console.error(error);
   }
-  return res.status(400).json({ error: { type, messages } });
+  return res.status(parseInt(code)).json({ error: { type, messages } });
 };
