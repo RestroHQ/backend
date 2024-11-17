@@ -23,7 +23,7 @@ export const generateFileName = (originalName) => {
 
 export const saveFile = async (folder, id, file) => {
   const fileName = generateFileName(file.originalname);
-  const userDir = path.join(UPLOAD_DIR, folder, id.toString());
+  const userDir = path.join(UPLOAD_DIR, folder, id);
   await fs.mkdir(userDir, { recursive: true });
 
   const filePath = path.join(userDir, fileName);
