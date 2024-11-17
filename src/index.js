@@ -13,14 +13,13 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.json({
     name: "RestroHQ API",
-    version: "1.0.0",
     description: "API for managing RestroHQ services",
-    versions: {
-      v1: "/api/v1",
-    },
     status: "UP",
     timestamp: new Date().toISOString(),
     uptime: calcUptime(),
+    versions: {
+      v1: "/api/v1",
+    },
   });
 });
 
