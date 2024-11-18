@@ -7,9 +7,25 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  SUPERADMIN
+  ADMIN
+  CASHIER
+  USER
+}
+
 model User {
   id       String  @id @default(cuid())
+  name     String
+  username String? @unique
   email    String  @unique
-  name     String?
   password String
+  phone    String?
+  role     Role    @default(USER)
+  image    String?
+  isActive Boolean @default(true)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
