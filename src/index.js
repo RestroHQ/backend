@@ -5,6 +5,7 @@ import { calcUptime } from "@/lib/utils";
 import cors from "cors";
 import express from "express";
 import { authRouter } from "./api/v1/routes/auth.routes";
+import { apiRouter } from "./api";
 
 const app = express();
 const port = config.PORT || 4000;
@@ -27,7 +28,7 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api", authRouter);
+app.use("/api", apiRouter);
 app.use(fileRouter);
 
 app.listen(port, () => {
