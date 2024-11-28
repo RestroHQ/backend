@@ -49,8 +49,20 @@ export const getRestaurantById = async (req, res) => {
 
 export const getUserRestaurants = async (req, res) => {
   try {
-    const restaurants = await restaurantService.getUserRestaurants(req.user.id);
-    res.json(restaurants);
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    const result = await restaurantService.getUserRestaurants(req.user.id, {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sortBy,
+      sortOrder,
+    });
+    res.json(result);
   } catch (error) {
     errorHandler(error, res);
   }
@@ -84,8 +96,24 @@ export const removeRestaurantStaff = async (req, res) => {
 
 export const getRestaurantStaff = async (req, res) => {
   try {
-    const staff = await restaurantService.getRestaurantStaff(req.params.id);
-    res.json(staff);
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "joinedAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    const result = await restaurantService.getRestaurantStaff(
+      req.params.id,
+      req.user.id,
+      {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sortBy,
+        sortOrder,
+      },
+    );
+    res.json(result);
   } catch (error) {
     errorHandler(error, res);
   }
