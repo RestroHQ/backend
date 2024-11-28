@@ -143,45 +143,68 @@ export const getRestaurantById = async (id) => {
   return restaurant;
 };
 
-export const getUserRestaurants = async (userId) => {
-  const restaurants = await prisma.restaurant.findMany({
-    where: {
-      OR: [
-        { ownerId: userId },
-        {
-          staff: {
-            some: {
-              userId: userId,
-            },
-          },
-        },
-      ],
-      deletedAt: null,
-    },
-    include: {
-      owner: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      staff: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
-        },
-      },
-    },
-  });
+export const getUserRestaurants = async (
+  userId,
+  { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = {},
+) => {
+  const offset = (page - 1) * limit;
 
-  return restaurants;
+  const where = {
+    OR: [
+      { ownerId: userId },
+      {
+        staff: {
+          some: {
+            userId: userId,
+          },
+        },
+      },
+    ],
+    deletedAt: null,
+  };
+
+  const [restaurants, total] = await Promise.all([
+    prisma.restaurant.findMany({
+      where,
+      include: {
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        staff: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip: offset,
+      take: limit,
+    }),
+    prisma.restaurant.count({ where }),
+  ]);
+
+  return {
+    restaurants,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
 export const addRestaurantStaff = async (restaurantId, data, userId) => {
@@ -268,7 +291,11 @@ export const removeRestaurantStaff = async (
   return { message: "Staff member removed successfully" };
 };
 
-export const getRestaurantStaff = async (restaurantId, userId) => {
+export const getRestaurantStaff = async (
+  restaurantId,
+  userId,
+  { page = 1, limit = 10, sortBy = "joinedAt", sortOrder = "desc" } = {},
+) => {
   const restaurant = await prisma.restaurant.findUnique({
     where: { id: restaurantId },
     include: {
@@ -300,5 +327,37 @@ export const getRestaurantStaff = async (restaurantId, userId) => {
     throw new Error("Unauthorized to view staff");
   }
 
-  return restaurant.staff;
+  const offset = (page - 1) * limit;
+
+  const [staff, total] = await Promise.all([
+    prisma.restaurantStaff.findMany({
+      where: { restaurantId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip: offset,
+      take: limit,
+    }),
+    prisma.restaurantStaff.count({ where: { restaurantId } }),
+  ]);
+
+  return {
+    staff,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };

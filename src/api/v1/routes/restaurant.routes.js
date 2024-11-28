@@ -5,12 +5,18 @@ import {
   createRestaurantSchema,
   updateRestaurantSchema,
   addStaffSchema,
+  paginationSchema,
 } from "../schemas/restaurant.schema";
 import * as restaurantController from "../controllers/restaurant.controller";
 
 const router = express.Router();
 
-router.get("/", authenticate, restaurantController.getUserRestaurants);
+router.get(
+  "/",
+  authenticate,
+  validate(paginationSchema),
+  restaurantController.getUserRestaurants,
+);
 router.get("/:id", authenticate, restaurantController.getRestaurantById);
 
 router.post(
@@ -40,6 +46,7 @@ router.get(
   "/:id/staff",
   authenticate,
   authorize(["SUPERADMIN", "ADMIN"]),
+  validate(paginationSchema),
   restaurantController.getRestaurantStaff,
 );
 
