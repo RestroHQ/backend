@@ -1,10 +1,10 @@
-import { v1Router } from "@/api/v1";
 import { fileRouter } from "@/api/v1/routes/file.routes";
 import { config } from "@/lib/config";
 import { createUploadDirs } from "@/lib/files";
 import { calcUptime } from "@/lib/utils";
 import cors from "cors";
 import express from "express";
+import { apiRouter } from "./api";
 
 const app = express();
 const port = config.PORT || 4000;
@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api/v1", v1Router);
+app.use("/api", apiRouter);
 app.use(fileRouter);
 
 app.listen(port, () => {

@@ -1,0 +1,128 @@
+import express from "express";
+import { authenticate, authorize } from "../middlewares/auth.middleware";
+import { validateRequest } from "../middlewares/validate.middleware";
+import {
+  createRestaurantSchema,
+  updateRestaurantSchema,
+  addStaffSchema,
+} from "../schemas/restaurant.schema";
+import * as restaurantService from "../services/restaurant.service";
+
+const router = express.Router();
+
+router.post(
+  "/",
+  authenticate,
+  authorize(["SUPERADMIN"]),
+  validateRequest(createRestaurantSchema),
+  async (req, res) => {
+    try {
+      const restaurant = await restaurantService.createRestaurant(
+        req.body,
+        req.user.id,
+      );
+      res.status(201).json(restaurant);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+);
+
+// Update restaurant (Super Admin only)
+router.put(
+  "/:id",
+  authenticate,
+  authorize(["SUPERADMIN"]),
+  validateRequest(updateRestaurantSchema),
+  async (req, res) => {
+    try {
+      const restaurant = await restaurantService.updateRestaurant(
+        req.params.id,
+        req.body,
+        req.user.id,
+      );
+      res.json(restaurant);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+);
+
+// Delete restaurant (Super Admin only)
+router.delete(
+  "/:id",
+  authenticate,
+  authorize(["SUPERADMIN"]),
+  async (req, res) => {
+    try {
+      const result = await restaurantService.deleteRestaurant(
+        req.params.id,
+        req.user.id,
+      );
+      res.json(result);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+);
+
+// Get restaurant by ID (All authenticated users)
+router.get("/:id", authenticate, async (req, res) => {
+  try {
+    const restaurant = await restaurantService.getRestaurantById(req.params.id);
+    res.json(restaurant);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+});
+
+// Get user's restaurants (All authenticated users)
+router.get("/", authenticate, async (req, res) => {
+  try {
+    const restaurants = await restaurantService.getUserRestaurants(req.user.id);
+    res.json(restaurants);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Add restaurant staff (Super Admin and Admin only)
+router.post(
+  "/:id/staff",
+  authenticate,
+  authorize(["SUPERADMIN", "ADMIN"]),
+  validateRequest(addStaffSchema),
+  async (req, res) => {
+    try {
+      const staff = await restaurantService.addRestaurantStaff(
+        req.params.id,
+        req.body,
+        req.user.id,
+      );
+      res.status(201).json(staff);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+);
+
+// Remove restaurant staff (Super Admin and Admin only)
+router.delete(
+  "/:id/staff/:userId",
+  authenticate,
+  authorize(["SUPERADMIN", "ADMIN"]),
+  async (req, res) => {
+    try {
+      const result = await restaurantService.removeRestaurantStaff(
+        req.params.id,
+        req.params.userId,
+        req.user.id,
+      );
+      res.json(result);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+);
+
+export default router;
