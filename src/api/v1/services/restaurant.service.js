@@ -267,3 +267,38 @@ export const removeRestaurantStaff = async (
 
   return { message: "Staff member removed successfully" };
 };
+
+export const getRestaurantStaff = async (restaurantId, userId) => {
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { id: restaurantId },
+    include: {
+      staff: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!restaurant) {
+    throw new Error("Restaurant not found");
+  }
+
+  const isOwner = restaurant.ownerId === userId;
+  const isAdmin = restaurant.staff.some(
+    (staff) => staff.userId === userId && staff.user.role === "ADMIN",
+  );
+
+  if (!isOwner && !isAdmin) {
+    throw new Error("Unauthorized to view staff");
+  }
+
+  return restaurant.staff;
+};
