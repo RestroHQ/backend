@@ -1,18 +1,27 @@
-import js from '@eslint/js';
-import prettier from 'eslint-plugin-prettier';
-import prettierRecommendedConfig from 'eslint-config-prettier';
+import eslintJs from "@eslint/js";
+import eslintPluginPrettier from "eslint-plugin-prettier";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
-  js.configs.recommended,
+  eslintJs.configs.recommended,
   {
     plugins: {
-      prettier: prettier,
+      prettier: eslintPluginPrettier,
     },
     rules: {
-      'no-console': 'warn',
-      'prettier/prettier': 'error',
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "prettier/prettier": "error",
+      "no-unused-vars": "off",
     },
-    ignores: ['node_modules/', 'dist/', 'build/'],
+    ignores: ["node_modules/", "dist/", "build/"],
+    languageOptions: {
+      globals: {
+        process: "readonly",
+        console: "readonly",
+      },
+      ecmaVersion: 2022,
+      sourceType: "module",
+    },
   },
-  prettierRecommendedConfig,
+  eslintConfigPrettier,
 ];

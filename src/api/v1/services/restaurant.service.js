@@ -25,7 +25,7 @@ export const createRestaurant = async (data, ownerId) => {
       "restaurants",
       restaurantId,
       "cover",
-      data.coverImage,
+      data.coverImage
     );
   }
 
@@ -67,7 +67,7 @@ export const updateRestaurant = async (id, data, userId) => {
       "restaurants",
       id,
       "cover",
-      data.coverImage,
+      data.coverImage
     );
   }
 
@@ -145,7 +145,7 @@ export const getRestaurantById = async (id) => {
 
 export const getUserRestaurants = async (
   userId,
-  { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = {},
+  { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = {}
 ) => {
   const offset = (page - 1) * limit;
 
@@ -221,7 +221,7 @@ export const addRestaurantStaff = async (restaurantId, data, userId) => {
 
   const isOwner = restaurant.ownerId === userId;
   const isAdmin = restaurant.staff.some(
-    (staff) => staff.userId === userId && staff.user.role === "ADMIN",
+    (staff) => staff.userId === userId && staff.user.role === "ADMIN"
   );
 
   if (!isOwner && !isAdmin) {
@@ -229,7 +229,7 @@ export const addRestaurantStaff = async (restaurantId, data, userId) => {
   }
 
   const existingStaff = restaurant.staff.find(
-    (staff) => staff.userId === data.userId,
+    (staff) => staff.userId === data.userId
   );
 
   if (existingStaff) {
@@ -259,7 +259,7 @@ export const addRestaurantStaff = async (restaurantId, data, userId) => {
 export const removeRestaurantStaff = async (
   restaurantId,
   staffUserId,
-  requestingUserId,
+  requestingUserId
 ) => {
   const restaurant = await prisma.restaurant.findUnique({
     where: { id: restaurantId },
@@ -274,7 +274,7 @@ export const removeRestaurantStaff = async (
 
   const isOwner = restaurant.ownerId === requestingUserId;
   const isAdmin = restaurant.staff.some(
-    (staff) => staff.userId === requestingUserId && staff.user.role === "ADMIN",
+    (staff) => staff.userId === requestingUserId && staff.user.role === "ADMIN"
   );
 
   if (!isOwner && !isAdmin) {
@@ -294,7 +294,7 @@ export const removeRestaurantStaff = async (
 export const getRestaurantStaff = async (
   restaurantId,
   userId,
-  { page = 1, limit = 10, sortBy = "joinedAt", sortOrder = "desc" } = {},
+  { page = 1, limit = 10, sortBy = "joinedAt", sortOrder = "desc" } = {}
 ) => {
   const restaurant = await prisma.restaurant.findUnique({
     where: { id: restaurantId },
@@ -320,7 +320,7 @@ export const getRestaurantStaff = async (
 
   const isOwner = restaurant.ownerId === userId;
   const isAdmin = restaurant.staff.some(
-    (staff) => staff.userId === userId && staff.user.role === "ADMIN",
+    (staff) => staff.userId === userId && staff.user.role === "ADMIN"
   );
 
   if (!isOwner && !isAdmin) {
