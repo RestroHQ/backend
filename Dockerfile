@@ -48,11 +48,11 @@ EXPOSE 3001
 # Create a script to handle startup tasks
 RUN pnpm dlx prisma migrate deploy
 
-# Switch to non-root user
-USER node
-
 # Remove dev dependencies after build
 RUN pnpm prune --prod
+
+# Switch to non-root user
+USER node
 
 # Start the application
 CMD ["pnpm", "start"]
