@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon --exec babel-node src/index.js",
-    "build": "babel src -d dist"
+    "build": "babel src -d dist",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +28,8 @@
     "@babel/core": "^7.26.0",
     "@babel/node": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "nodemon": "^3.1.7",
     "prisma": "^5.22.0"
