@@ -21,7 +21,7 @@ export const authenticate = async (req, res, next) => {
 
     next();
   } catch (error) {
-    errorHandler("Invalid token", res, 401);
+    errorHandler(error, res, 401);
   }
 };
 

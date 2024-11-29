@@ -30,13 +30,13 @@ export const createRestaurantSchema = z.object({
     .string()
     .regex(
       /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
-      "Invalid opening time format (HH:MM)",
+      "Invalid opening time format (HH:MM)"
     ),
   closingTime: z
     .string()
     .regex(
       /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
-      "Invalid closing time format (HH:MM)",
+      "Invalid closing time format (HH:MM)"
     ),
   openDays: z
     .array(z.string())

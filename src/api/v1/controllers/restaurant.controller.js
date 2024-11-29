@@ -5,7 +5,7 @@ export const createRestaurant = async (req, res) => {
   try {
     const restaurant = await restaurantService.createRestaurant(
       req.body,
-      req.user.id,
+      req.user.id
     );
     res.status(201).json(restaurant);
   } catch (error) {
@@ -18,7 +18,7 @@ export const updateRestaurant = async (req, res) => {
     const restaurant = await restaurantService.updateRestaurant(
       req.params.id,
       req.body,
-      req.user.id,
+      req.user.id
     );
     res.json(restaurant);
   } catch (error) {
@@ -30,7 +30,7 @@ export const deleteRestaurant = async (req, res) => {
   try {
     const result = await restaurantService.deleteRestaurant(
       req.params.id,
-      req.user.id,
+      req.user.id
     );
     res.json(result);
   } catch (error) {
@@ -73,7 +73,7 @@ export const addRestaurantStaff = async (req, res) => {
     const staff = await restaurantService.addRestaurantStaff(
       req.params.id,
       req.body,
-      req.user.id,
+      req.user.id
     );
     res.status(201).json(staff);
   } catch (error) {
@@ -86,7 +86,7 @@ export const removeRestaurantStaff = async (req, res) => {
     const result = await restaurantService.removeRestaurantStaff(
       req.params.id,
       req.params.userId,
-      req.user.id,
+      req.user.id
     );
     res.json(result);
   } catch (error) {
@@ -111,7 +111,7 @@ export const getRestaurantStaff = async (req, res) => {
         limit: parseInt(limit),
         sortBy,
         sortOrder,
-      },
+      }
     );
     res.json(result);
   } catch (error) {

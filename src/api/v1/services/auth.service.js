@@ -16,7 +16,7 @@ export const register = async (data) => {
     throw new Error(
       existingUser.email === data.email
         ? "Email already registered"
-        : "Username already taken",
+        : "Username already taken"
     );
   }
 
@@ -79,7 +79,7 @@ export const login = async (data) => {
 
 export const updatePassword = async (
   userId,
-  { currentPassword, newPassword },
+  { currentPassword, newPassword }
 ) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },

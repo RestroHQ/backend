@@ -15,7 +15,7 @@ router.get(
   "/",
   authenticate,
   validate(paginationSchema),
-  restaurantController.getUserRestaurants,
+  restaurantController.getUserRestaurants
 );
 router.get("/:id", authenticate, restaurantController.getRestaurantById);
 
@@ -24,7 +24,7 @@ router.post(
   authenticate,
   authorize(["SUPERADMIN"]),
   validate(createRestaurantSchema),
-  restaurantController.createRestaurant,
+  restaurantController.createRestaurant
 );
 
 router.put(
@@ -32,14 +32,14 @@ router.put(
   authenticate,
   authorize(["SUPERADMIN"]),
   validate(updateRestaurantSchema),
-  restaurantController.updateRestaurant,
+  restaurantController.updateRestaurant
 );
 
 router.delete(
   "/:id",
   authenticate,
   authorize(["SUPERADMIN"]),
-  restaurantController.deleteRestaurant,
+  restaurantController.deleteRestaurant
 );
 
 router.get(
@@ -47,7 +47,7 @@ router.get(
   authenticate,
   authorize(["SUPERADMIN", "ADMIN"]),
   validate(paginationSchema),
-  restaurantController.getRestaurantStaff,
+  restaurantController.getRestaurantStaff
 );
 
 router.post(
@@ -55,14 +55,14 @@ router.post(
   authenticate,
   authorize(["SUPERADMIN", "ADMIN"]),
   validate(addStaffSchema),
-  restaurantController.addRestaurantStaff,
+  restaurantController.addRestaurantStaff
 );
 
 router.delete(
   "/:id/staff/:userId",
   authenticate,
   authorize(["SUPERADMIN", "ADMIN"]),
-  restaurantController.removeRestaurantStaff,
+  restaurantController.removeRestaurantStaff
 );
 
 export const restaurantRouter = router;
