@@ -1,10 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 enum Role {
@@ -14,20 +14,72 @@ enum Role {
   USER
 }
 
-model User {
-  id       String  @id @default(cuid())
-  name     String
-  username String? @unique
-  email    String  @unique
-  password String
-  phone    String?
-  role     Role    @default(USER)
-  image    String?
-  isActive Boolean @default(true)
+enum RestaurantStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
 
+model User {
+  id        String            @id @default(cuid())
+  name      String?
+  username  String?           @unique
+  email     String            @unique
+  password  String
+  phone     String?
+  role      Role              @default(USER)
+  image     String?
+  isActive  Boolean           @default(true)
   deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  staffAt   RestaurantStaff[]
+
+  ownedRestaurants Restaurant[] @relation("RestaurantOwner")
+}
+
+model Restaurant {
+  id          String           @id @default(cuid())
+  name        String
+  address     String
+  phone       String
+  email       String           @unique
+  website     String?
+  logo        String?
+  coverImage  String?
+  cuisineType String
+  status      RestaurantStatus @default(ACTIVE)
+  ownerId     String
+  deletedAt   DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  openingTime String
+  closingTime String
+  openDays    String[]
+
+  taxNumber         String?
+  description       String?
+  capacity          Int?
+  isDeliveryEnabled Boolean           @default(false)
+  staff             RestaurantStaff[]
+
+  owner User @relation("RestaurantOwner", fields: [ownerId], references: [id])
+
+  @@index([ownerId])
+}
+
+model RestaurantStaff {
+  id           String     @id @default(cuid())
+  restaurantId String
+  userId       String
+  joinedAt     DateTime   @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@unique([restaurantId, userId])
+  @@index([restaurantId])
+  @@index([userId])
 }
 
 model Table {

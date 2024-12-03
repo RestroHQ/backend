@@ -1,3 +1,4 @@
+import { errorHandler } from "@/lib/error-handler";
 import * as userService from "../services/user.service";
 
 export const getAllUsers = async (req, res) => {
@@ -6,7 +7,7 @@ export const getAllUsers = async (req, res) => {
 
     res.json(users);
   } catch (error) {
-    handleError(error, res);
+    errorHandler(error, res);
   }
 };
 
@@ -17,7 +18,7 @@ export const getUserById = async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    handleError(error, res);
+    errorHandler(error, res);
   }
 };
 
@@ -26,7 +27,7 @@ export const getCurrentUser = async (req, res) => {
     const { user } = req;
     res.json(user);
   } catch (error) {
-    handleError(error, res);
+    errorHandler(error, res);
   }
 };
 
@@ -40,7 +41,7 @@ export const updateUserRole = async (req, res) => {
 
     res.json(updatedUser);
   } catch (error) {
-    handleError(error, res);
+    errorHandler(error, res);
   }
 };
 
@@ -58,7 +59,7 @@ export const updateUser = async (req, res) => {
 
     res.json(updatedUser);
   } catch (error) {
-    handleError(error, res);
+    errorHandler(error, res);
   }
 };
 
@@ -71,7 +72,7 @@ export const deleteUser = async (req, res) => {
 
     res.json({ message: "User deleted successfully" });
   } catch (error) {
-    handleError(error, res);
+    errorHandler(error, res);
   }
 };
 
@@ -82,6 +83,6 @@ export const restoreUser = async (req, res) => {
 
     res.json({ message: "User restored successfully" });
   } catch (error) {
-    handleError(error, res);
+    errorHandler(error, res);
   }
 };
