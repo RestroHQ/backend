@@ -6,6 +6,14 @@ async function createCustomer(customerData) {
   });
 }
 
+async function getCustomerProfile(customerId) {
+    return await prisma.customer.findUnique({
+      where: { id: customerId },
+      include: { profile: true }, // Includes the profile details
+    });
+  }
+
 module.exports={
     createCustomer,
+    getCustomerProfile
 }

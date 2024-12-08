@@ -15,6 +15,20 @@ async function createCustomer(req, res) {
   }
 }
 
+async function getCustomerProfile(req, res) {
+    try {
+      const { customerId } = req.params;
+      const customerProfile = await customerService.getCustomerProfile(customerId);
+      if (!customerProfile) {
+        return res.status(404).json({ error: "Customer profile not found" });
+      }
+      res.status(200).json({ data: customerProfile });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
 module.exports={
-    createCustomer
+    createCustomer,
+    getCustomerProfile,
 }
