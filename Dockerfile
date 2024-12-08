@@ -36,8 +36,6 @@ RUN mkdir -p /usr/src/app/uploads/users && \
 # Build using Babel
 RUN pnpm run build
 
-# Remove dev dependencies after build
-RUN pnpm prune --prod
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -49,6 +47,9 @@ EXPOSE 3001
 
 # Create a script to handle startup tasks
 RUN pnpm dlx prisma migrate deploy
+
+# Remove dev dependencies after build
+RUN pnpm prune --prod
 
 # Switch to non-root user
 USER node

@@ -5,7 +5,17 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon --exec babel-node src/index.js",
-    "build": "babel src -d dist"
+    "build": "babel src -d dist",
+    "prepare": "pnpm dlx husky"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "eslint --max-warnings=0",
+      "prettier --write"
+    ],
+    "**/*.{html,json,css,scss,md,mdx}": [
+      "prettier -w"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -27,8 +37,17 @@
     "@babel/core": "^7.26.0",
     "@babel/node": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/js": "^9.15.0",
     "babel-plugin-module-resolver": "^5.0.2",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
     "nodemon": "^3.1.7",
+    "prettier": "^3.4.1",
     "prisma": "^5.22.0"
   }
 }
