@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -f "package-lock.json" ] || [ -f "yarn.lock" ]; then
+  echo "❌ Only pnpm is allowed. Please remove other lock files."
+  exit 1
+fi
+
+pnpm dlx lint-staged
