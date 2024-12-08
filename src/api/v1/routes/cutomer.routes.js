@@ -13,7 +13,15 @@ async function getCustomerProfile(customerId) {
     });
   }
 
+async function updateCustomerProfile(customerId, profileData) {
+    return await prisma.profile.update({
+      where: { customerId },
+      data: profileData,
+    });
+  }
+
 module.exports={
     createCustomer,
-    getCustomerProfile
+    getCustomerProfile,
+    updateCustomerProfile
 }
