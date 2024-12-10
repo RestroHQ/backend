@@ -1,3 +1,4 @@
+import { errorHandler } from '@/lib/error-handler';
 import * as tableService from '../services/table.service';
 
 
@@ -12,18 +13,16 @@ export const getTables = async (req, res) => {
 
     res.status(200).json(tables);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: `Error fetching tables: ${error.message}` });
+    errorHandler(error, res);
   }
 };
-
 
 export const createTable = async (req, res) => {
   try {
     const { restaurantId } = req.params;
     const { name, capacity } = req.body;
 
-    // Validate if required fields are present
+  
     if (!name || !capacity) {
       return res.status(400).json({ error: 'Table name and capacity are required' });
     }
@@ -31,8 +30,7 @@ export const createTable = async (req, res) => {
     const table = await tableService.createTable(restaurantId, req.body);
     res.status(201).json(table);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: `Error creating table: ${error.message}` });
+    errorHandler(error, res);
   }
 };
 
@@ -48,11 +46,9 @@ export const updateTable = async (req, res) => {
     const updatedTable = await tableService.updateTable(id, req.body);
     res.status(200).json(updatedTable);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: `Error updating table: ${error.message}` });
+    errorHandler(error, res);
   }
 };
-
 
 export const deleteTable = async (req, res) => {
   try {
@@ -64,9 +60,8 @@ export const deleteTable = async (req, res) => {
       return res.status(404).json({ error: 'Table not found' });
     }
 
-    res.status(204).send(); 
+    res.status(204).send();
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: `Error deleting table: ${error.message}` });
+    errorHandler(error, res);
   }
 };
