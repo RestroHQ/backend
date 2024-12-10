@@ -142,3 +142,31 @@ export const checkAvailability = async (restaurantId, date, guests) => {
       throw new Error("Error calculating capacity: " + error.message);
     }
   };
+
+  export const manageWaitlist = async (data) => {
+    try {
+      
+      const tableAvailable = await checkAvailability(data.restaurantId, data.date, data.guestCount);
+  
+      if (tableAvailable) {
+       
+        return await createReservation(data);
+      } else {
+        
+        const waitlistEntry = await prisma.waitlist.create({
+          data: {
+            restaurantId: data.restaurantId,
+            userId: data.userId,
+            timeSlotId: data.timeSlotId,
+            guestCount: data.guestCount,
+            rank: 0, 
+          },
+        });
+  
+        return waitlistEntry;
+      }
+    } catch (error) {
+      
+      throw new Error("Error managing waitlist: " + error.message);
+    }
+  };

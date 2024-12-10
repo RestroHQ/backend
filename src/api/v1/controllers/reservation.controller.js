@@ -57,3 +57,20 @@ export const getCapacity = async (req, res) => {
       res.status(500).json({ error: 'Error calculating capacity' });
     }
   };
+
+  export const manageWaitlist = async (req, res) => {
+    try {
+      const { restaurantId } = req.params;
+      const { date, guests, userId, timeSlotId } = req.body;  // Accept userId and timeSlotId as part of the request body
+      const waitlistEntry = await reservationService.manageWaitlist({
+        restaurantId,
+        date,
+        guests,
+        userId,
+        timeSlotId,
+      });
+      res.status(201).json(waitlistEntry);  // Respond with the created waitlist entry
+    } catch (error) {
+      res.status(500).json({ error: 'Error managing waitlist' });
+    }
+  };
