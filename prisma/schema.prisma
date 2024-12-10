@@ -34,10 +34,12 @@ model User {
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
   staffAt   RestaurantStaff[]
+
   
 
   ownedRestaurants Restaurant[] @relation("RestaurantOwner")
   reservations     Reservation[]
+  waitlists        Waitlist[]
 }
 
 model Restaurant {
@@ -68,6 +70,7 @@ model Restaurant {
   tables            Table[]
   reservations      Reservation[]
   timeSlots        TimeSlot[]
+   waitlists         Waitlist[]
 
   owner User @relation("RestaurantOwner", fields: [ownerId], references: [id])
 
@@ -119,6 +122,7 @@ model Reservation {
   table        Table      @relation(fields: [tableId], references: [id])
   user         User       @relation(fields: [userId], references: [id])
   timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id])
+  
 
   @@index([restaurantId])
   @@index([tableId])
@@ -145,8 +149,30 @@ model TimeSlot {
   updatedAt    DateTime  @updatedAt
 
   reservations Reservation[]
+  waitlists        Waitlist[]
 
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
 
   @@index([restaurantId, startTime, endTime])
+}
+
+model Waitlist {
+  id           String    @id @default(cuid())
+  restaurantId String
+  userId       String
+  timeSlotId   String
+  guestCount   Int
+  rank         Int       
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+  timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id])
+
+
+  @@unique([restaurantId, userId, timeSlotId])
+  @@index([restaurantId])
+  @@index([userId])
+  @@index([timeSlotId])
 }
