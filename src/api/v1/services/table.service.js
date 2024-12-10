@@ -14,7 +14,7 @@ export const getAllTables = async (restaurantId) => {
 
 export const createTable = async (restaurantId, data) => {
   try {
-    // Validation (if needed)
+    
     if (!data.name || !data.capacity) {
       throw new Error("Table name and capacity are required.");
     }
@@ -46,7 +46,7 @@ export const createTable = async (restaurantId, data) => {
 
 export const updateTable = async (tableId, data) => {
   try {
-    // Validate that data has the necessary fields
+    
     if (!data.name && !data.capacity) {
       throw new Error("You must provide either a name or a capacity to update.");
     }
@@ -65,7 +65,7 @@ export const updateTable = async (tableId, data) => {
 
 export const deleteTable = async (tableId) => {
   try {
-    // Check if the table exists
+    
     const table = await prisma.table.findUnique({
       where: { id: tableId },
     });
@@ -73,7 +73,7 @@ export const deleteTable = async (tableId) => {
     if (!table) {
       throw new Error("Table not found.");
     }
- // Proceed to delete the table
+ 
     return await prisma.table.delete({
       where: { id: tableId },
     });
