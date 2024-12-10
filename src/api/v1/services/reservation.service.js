@@ -104,3 +104,41 @@ export const deleteReservation = async (reservationId) => {
     throw new Error("Error deleting reservation: " + error.message);
   }
 };
+
+
+export const checkAvailability = async (restaurantId, date, guests) => {
+    try {
+      const availableTables = await prisma.table.findMany({
+        where: {
+          restaurantId,
+          capacity: { gte: guests },
+          reservations: {
+            none: {
+              timeSlot: {
+                startTime: { lte: new Date(date) },
+                endTime: { gte: new Date(date) },
+              },
+              status: { not: 'CANCELLED' },
+            },
+          },
+        },
+      });
+  
+      return availableTables.length > 0;
+    } catch (error) {
+      throw new Error("Error checking availability: " + error.message);
+    }
+  };
+
+  export const calculateCapacity = async (restaurantId) => {
+    try {
+      const tables = await prisma.table.findMany({
+        where: { restaurantId },
+        select: { capacity: true },
+      });
+  
+      return tables.reduce((sum, table) => sum + table.capacity, 0);
+    } catch (error) {
+      throw new Error("Error calculating capacity: " + error.message);
+    }
+  };

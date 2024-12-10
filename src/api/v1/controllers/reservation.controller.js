@@ -38,3 +38,22 @@ export const deleteReservation = async (req, res) => {
     res.status(500).json({ error: 'Error deleting reservation' });
   }
 };
+export const checkAvailability = async (req, res) => {
+ try {
+      const { restaurantId } = req.params;
+      const { date, guests } = req.query;
+      const availability = await reservationService.checkAvailability(restaurantId, date, guests);
+      res.status(200).json(availability);
+    } catch (error) {
+      res.status(500).json({ error: 'Error checking availability' });
+    }
+  };
+export const getCapacity = async (req, res) => {
+ try {
+      const { restaurantId } = req.params;
+      const capacity = await reservationService.calculateCapacity(restaurantId);
+      res.status(200).json(capacity);
+    } catch (error) {
+      res.status(500).json({ error: 'Error calculating capacity' });
+    }
+  };
