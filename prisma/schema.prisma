@@ -139,7 +139,7 @@ model TimeSlot {
   restaurantId String
   startTime    DateTime
   endTime      DateTime
-  capacity     Int       // Max reservations allowed in this slot.
+  capacity     Int       
   isAvailable  Boolean   @default(true)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
