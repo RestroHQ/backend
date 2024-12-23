@@ -32,4 +32,26 @@ exports.getAllCustomers = async (req, res) => {
     }
   };
 
-  
+  exports.updateCustomer = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, email, phone, address, loyaltyPoints } = req.body;
+      const updatedCustomer = await prisma.customer.update({
+        where: { id: Number(id) },
+        data: { name, email, phone, address, loyaltyPoints },
+      });
+      res.status(200).json(updatedCustomer);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update customer' });
+    }
+  };
+
+  exports.deleteCustomer = async (req, res) => {
+    try {
+      const { id } = req.params;
+      await prisma.customer.delete({ where: { id: Number(id) } });
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete customer' });
+    }
+  };
