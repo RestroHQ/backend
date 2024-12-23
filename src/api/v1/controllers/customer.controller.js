@@ -55,3 +55,39 @@ exports.getAllCustomers = async (req, res) => {
       res.status(500).json({ error: 'Failed to delete customer' });
     }
   };
+
+  exports.getOrderHistory = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const orders = await prisma.order.findMany({
+        where: { customerId: Number(id) },
+        orderBy: { createdAt: 'desc' },
+      });
+      res.status(200).json(orders);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch order history' });
+    }
+  };
+  
+  exports.getCustomerAnalytics = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      const totalOrders = await prisma.order.count({ where: { customerId: Number(id) } });
+      const totalSpent = await prisma.order.aggregate({
+        _sum: { totalAmount: true },
+        where: { customerId: Number(id) },
+      });
+  
+      const analytics = {
+        totalOrders,
+        totalSpent: totalSpent._sum.totalAmount || 0,
+        averageSpend: totalOrders ? totalSpent._sum.totalAmount / totalOrders : 0,
+      };
+  
+      res.status(200).json(analytics);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch analytics' });
+    }
+  };
+  
