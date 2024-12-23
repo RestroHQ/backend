@@ -20,8 +20,16 @@ async function updateCustomerProfile(customerId, profileData) {
     });
   }
 
+  async function getOrderHistory(customerId) {
+    return await prisma.order.findMany({
+      where: { customerId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
 module.exports={
     createCustomer,
     getCustomerProfile,
-    updateCustomerProfile
+    updateCustomerProfile,
+    getOrderHistory
 }
