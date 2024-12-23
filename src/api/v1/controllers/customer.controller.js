@@ -20,4 +20,16 @@ exports.getAllCustomers = async (req, res) => {
     }
   };
 
+  exports.createCustomer = async (req, res) => {
+    try {
+      const { name, email, phone, address } = req.body;
+      const customer = await prisma.customer.create({
+        data: { name, email, phone, address },
+      });
+      res.status(201).json(customer);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create customer' });
+    }
+  };
+
   
