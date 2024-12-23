@@ -41,8 +41,22 @@ async function updateCustomerProfile(req, res) {
     }
   }
 
+  async function getOrderHistory(req, res) {
+    try {
+      const { customerId } = req.params;
+      const orderHistory = await customerService.getOrderHistory(customerId);
+      if (!orderHistory || orderHistory.length === 0) {
+        return res.status(404).json({ error: "No order history found" });
+      }
+      res.status(200).json({ data: orderHistory });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
 module.exports={
     createCustomer,
     getCustomerProfile,
-    updateCustomerProfile
+    updateCustomerProfile,
+    getOrderHistory
 }
