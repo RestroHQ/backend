@@ -54,6 +54,8 @@ async function updateCustomerProfile(req, res) {
     }
   }
 
+  
+
 module.exports={
     createCustomer,
     getCustomerProfile,
