@@ -23,8 +23,8 @@ export const createRestaurantSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email("Invalid email address"),
   website: z.string().url("Invalid website URL").optional().nullable(),
-  logo: z.string().optional(),
-  coverImage: z.string().optional(),
+  logo: z.string().optional().nullable(),
+  coverImage: z.string().optional().nullable(),
   cuisineType: z.string().min(2, "Cuisine type must be at least 2 characters"),
   openingTime: z
     .string()

@@ -27,7 +27,7 @@ router.post(
   restaurantController.createRestaurant
 );
 
-router.put(
+router.patch(
   "/:id",
   authenticate,
   authorize(["SUPERADMIN"]),
