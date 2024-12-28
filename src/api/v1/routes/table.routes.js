@@ -6,11 +6,7 @@ import * as tableController from "../controllers/table.controller";
 
 const router = express.Router();
 
-router.get(
-  "/:restaurantId",
-  authenticate,
-  tableController.getTables
-);
+router.get("/:restaurantId", authenticate, tableController.getTables);
 
 router.post(
   "/:restaurantId",

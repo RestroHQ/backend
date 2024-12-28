@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authRouter } from "./routes/auth.routes";
 import { userRouter } from "./routes/user.routes";
 import { restaurantRouter } from "./routes/restaurant.routes";
+import { fileRouter } from "./routes/file.routes";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.get("/", (req, res) => {
 router.use("/auth", authRouter);
 router.use("/users", userRouter);
 router.use("/restaurants", restaurantRouter);
+router.use("/files", fileRouter);
 
 export const v1Router = router;

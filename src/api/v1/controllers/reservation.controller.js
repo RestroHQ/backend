@@ -1,6 +1,5 @@
-import { errorHandler } from '@/lib/error-handler';
-import * as reservationService from '../services/reservation.service';
-
+import { errorHandler } from "@/lib/error-handler";
+import * as reservationService from "../services/reservation.service";
 
 export const getReservations = async (req, res) => {
   try {
@@ -24,7 +23,10 @@ export const createReservation = async (req, res) => {
 export const updateReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    const reservation = await reservationService.updateReservation(id, req.body);
+    const reservation = await reservationService.updateReservation(
+      id,
+      req.body
+    );
     res.status(200).json(reservation);
   } catch (error) {
     errorHandler(error, res);
@@ -45,7 +47,11 @@ export const checkAvailability = async (req, res) => {
   try {
     const { restaurantId } = req.params;
     const { date, guests } = req.query;
-    const availability = await reservationService.checkAvailability(restaurantId, date, guests);
+    const availability = await reservationService.checkAvailability(
+      restaurantId,
+      date,
+      guests
+    );
     res.status(200).json(availability);
   } catch (error) {
     errorHandler(error, res);
@@ -65,7 +71,7 @@ export const getCapacity = async (req, res) => {
 export const manageWaitlist = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const { date, guests, userId, timeSlotId } = req.body; 
+    const { date, guests, userId, timeSlotId } = req.body;
     const waitlistEntry = await reservationService.manageWaitlist({
       restaurantId,
       date,
@@ -73,7 +79,7 @@ export const manageWaitlist = async (req, res) => {
       userId,
       timeSlotId,
     });
-    res.status(201).json(waitlistEntry); 
+    res.status(201).json(waitlistEntry);
   } catch (error) {
     errorHandler(error, res);
   }

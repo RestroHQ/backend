@@ -1,5 +1,4 @@
-import { prisma } from '../prisma/prisma';
-
+import { prisma } from "../prisma/prisma";
 
 export const getAllTables = async (restaurantId) => {
   try {
@@ -11,15 +10,12 @@ export const getAllTables = async (restaurantId) => {
   }
 };
 
-
 export const createTable = async (restaurantId, data) => {
   try {
-    
     if (!data.name || !data.capacity) {
       throw new Error("Table name and capacity are required.");
     }
 
-   
     const existingTable = await prisma.table.findFirst({
       where: {
         restaurantId,
@@ -31,7 +27,6 @@ export const createTable = async (restaurantId, data) => {
       throw new Error("Table with this name already exists.");
     }
 
-   
     return await prisma.table.create({
       data: {
         ...data,
@@ -43,12 +38,12 @@ export const createTable = async (restaurantId, data) => {
   }
 };
 
-
 export const updateTable = async (tableId, data) => {
   try {
-    
     if (!data.name && !data.capacity) {
-      throw new Error("You must provide either a name or a capacity to update.");
+      throw new Error(
+        "You must provide either a name or a capacity to update."
+      );
     }
 
     const updatedTable = await prisma.table.update({
@@ -62,10 +57,8 @@ export const updateTable = async (tableId, data) => {
   }
 };
 
-
 export const deleteTable = async (tableId) => {
   try {
-    
     const table = await prisma.table.findUnique({
       where: { id: tableId },
     });
@@ -73,7 +66,7 @@ export const deleteTable = async (tableId) => {
     if (!table) {
       throw new Error("Table not found.");
     }
- 
+
     return await prisma.table.delete({
       where: { id: tableId },
     });

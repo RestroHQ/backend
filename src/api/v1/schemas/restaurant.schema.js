@@ -19,12 +19,12 @@ export const paginationSchema = z.object({
 
 export const createRestaurantSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  phone: z.string().min(10, "Phone must be at least 10 characters"),
+  address: z.string().optional(),
+  phone: z.string().optional(),
   email: z.string().email("Invalid email address"),
   website: z.string().url("Invalid website URL").optional().nullable(),
-  logo: z.any().optional(),
-  coverImage: z.any().optional(),
+  logo: z.string().optional(),
+  coverImage: z.string().optional(),
   cuisineType: z.string().min(2, "Cuisine type must be at least 2 characters"),
   openingTime: z
     .string()

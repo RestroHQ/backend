@@ -1,6 +1,5 @@
-import { errorHandler } from '@/lib/error-handler';
-import * as tableService from '../services/table.service';
-
+import { errorHandler } from "@/lib/error-handler";
+import * as tableService from "../services/table.service";
 
 export const getTables = async (req, res) => {
   try {
@@ -8,7 +7,9 @@ export const getTables = async (req, res) => {
     const tables = await tableService.getAllTables(restaurantId);
 
     if (!tables || tables.length === 0) {
-      return res.status(404).json({ error: 'No tables found for this restaurant' });
+      return res
+        .status(404)
+        .json({ error: "No tables found for this restaurant" });
     }
 
     res.status(200).json(tables);
@@ -22,9 +23,10 @@ export const createTable = async (req, res) => {
     const { restaurantId } = req.params;
     const { name, capacity } = req.body;
 
-  
     if (!name || !capacity) {
-      return res.status(400).json({ error: 'Table name and capacity are required' });
+      return res
+        .status(400)
+        .json({ error: "Table name and capacity are required" });
     }
 
     const table = await tableService.createTable(restaurantId, req.body);
@@ -40,7 +42,9 @@ export const updateTable = async (req, res) => {
     const { name, capacity } = req.body;
 
     if (!name && !capacity) {
-      return res.status(400).json({ error: 'You must provide either a name or capacity to update' });
+      return res.status(400).json({
+        error: "You must provide either a name or capacity to update",
+      });
     }
 
     const updatedTable = await tableService.updateTable(id, req.body);
@@ -57,7 +61,7 @@ export const deleteTable = async (req, res) => {
     const table = await tableService.deleteTable(id);
 
     if (!table) {
-      return res.status(404).json({ error: 'Table not found' });
+      return res.status(404).json({ error: "Table not found" });
     }
 
     res.status(204).send();
