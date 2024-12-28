@@ -16,6 +16,13 @@ export const createRestaurant = async (data, ownerId) => {
     },
   });
 
+  await prisma.restaurantStaff.create({
+    data: {
+      restaurantId: restaurant.id,
+      userId: ownerId,
+    },
+  });
+
   return restaurant;
 };
 

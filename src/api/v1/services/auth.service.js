@@ -43,6 +43,13 @@ export const login = async (data) => {
       isActive: true,
       deletedAt: null,
     },
+    include: {
+      staffAt: {
+        select: {
+          restaurantId: true,
+        },
+      },
+    },
   });
 
   if (!user) {
@@ -59,6 +66,9 @@ export const login = async (data) => {
   });
 
   const { password, ...userWithoutPassword } = user;
+
+  user.restaursnts = user.staffAt?.map(({ restaurantId }) => restaurantId);
+  user.staffAt = undefined;
 
   return {
     user: userWithoutPassword,
