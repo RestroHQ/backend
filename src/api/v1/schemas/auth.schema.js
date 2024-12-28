@@ -13,8 +13,8 @@ export const registerSchema = z.object({
       "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number, and one special character"
     ),
   phone: z.string().optional(),
-  username: z.string().min(3).max(50).optional(),
-  image: z.any().optional(),
+  username: z.string().max(50).optional(),
+  image: z.string().optional(),
 });
 
 export const loginSchema = z.object({

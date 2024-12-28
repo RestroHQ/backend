@@ -1,5 +1,4 @@
 import { config } from "@/lib/config";
-import { saveUserFile } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { createId } from "@paralleldrive/cuid2";
 import bcrypt from "bcryptjs";
@@ -25,21 +24,11 @@ export const register = async (data) => {
   const salt = await bcrypt.genSalt(parseInt(config.SALT_ROUNDS));
   const hashedPassword = await bcrypt.hash(data.password, salt);
 
-  let imagePath = null;
-
-  if (data.image) {
-    imagePath = await saveUserFile("users", userId.toString(), data.image);
-  }
-
   const user = await prisma.user.create({
     data: {
+      ...data,
       id: userId,
-      name: data.name,
-      email: data.email,
-      username: data.username,
       password: hashedPassword,
-      phone: data.phone,
-      image: imagePath,
     },
   });
 

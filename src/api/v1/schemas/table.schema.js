@@ -6,4 +6,3 @@ export const createTableSchema = z.object({
 });
 
 export const updateTableSchema = createTableSchema.partial();
-
