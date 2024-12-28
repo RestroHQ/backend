@@ -1,14 +1,19 @@
-import { prisma } from '../prisma/prisma';
-
+import { prisma } from "../prisma/prisma";
 
 export const createReservation = async (data) => {
   try {
-
-    if (!data.restaurantId || !data.tableId || !data.userId || !data.timeSlotId || !data.guestCount) {
-      throw new Error("Missing required reservation fields: restaurantId, tableId, userId, timeSlotId, and guestCount.");
+    if (
+      !data.restaurantId ||
+      !data.tableId ||
+      !data.userId ||
+      !data.timeSlotId ||
+      !data.guestCount
+    ) {
+      throw new Error(
+        "Missing required reservation fields: restaurantId, tableId, userId, timeSlotId, and guestCount."
+      );
     }
 
-    
     const table = await prisma.table.findUnique({
       where: { id: data.tableId },
       include: { reservations: true },
@@ -18,18 +23,19 @@ export const createReservation = async (data) => {
       throw new Error("Table not found.");
     }
 
-  
     const conflictingReservations = table.reservations.filter((reservation) => {
       return (
-        reservation.timeSlotId === data.timeSlotId && reservation.status !== 'CANCELLED'
+        reservation.timeSlotId === data.timeSlotId &&
+        reservation.status !== "CANCELLED"
       );
     });
 
     if (conflictingReservations.length > 0) {
-      throw new Error("The selected table is already booked for this time slot.");
+      throw new Error(
+        "The selected table is already booked for this time slot."
+      );
     }
 
-    
     return await prisma.reservation.create({
       data,
     });
@@ -37,7 +43,6 @@ export const createReservation = async (data) => {
     throw new Error("Error creating reservation: " + error.message);
   }
 };
-
 
 export const getReservations = async (restaurantId) => {
   try {
@@ -50,7 +55,6 @@ export const getReservations = async (restaurantId) => {
   }
 };
 
-
 export const updateReservation = async (reservationId, data) => {
   try {
     // Check if the reservation exists
@@ -62,13 +66,12 @@ export const updateReservation = async (reservationId, data) => {
       throw new Error("Reservation not found.");
     }
 
-    
     if (data.timeSlotId) {
       const conflictingReservations = await prisma.reservation.findMany({
         where: {
           tableId: reservation.tableId,
           timeSlotId: data.timeSlotId,
-          status: { not: 'CANCELLED' },
+          status: { not: "CANCELLED" },
         },
       });
 
@@ -85,7 +88,6 @@ export const updateReservation = async (reservationId, data) => {
     throw new Error("Error updating reservation: " + error.message);
   }
 };
-
 
 export const deleteReservation = async (reservationId) => {
   try {
@@ -105,68 +107,67 @@ export const deleteReservation = async (reservationId) => {
   }
 };
 
-
 export const checkAvailability = async (restaurantId, date, guests) => {
-    try {
-      const availableTables = await prisma.table.findMany({
-        where: {
-          restaurantId,
-          capacity: { gte: guests },
-          reservations: {
-            none: {
-              timeSlot: {
-                startTime: { lte: new Date(date) },
-                endTime: { gte: new Date(date) },
-              },
-              status: { not: 'CANCELLED' },
+  try {
+    const availableTables = await prisma.table.findMany({
+      where: {
+        restaurantId,
+        capacity: { gte: guests },
+        reservations: {
+          none: {
+            timeSlot: {
+              startTime: { lte: new Date(date) },
+              endTime: { gte: new Date(date) },
             },
+            status: { not: "CANCELLED" },
           },
         },
-      });
-  
-      return availableTables.length > 0;
-    } catch (error) {
-      throw new Error("Error checking availability: " + error.message);
-    }
-  };
+      },
+    });
 
-  export const calculateCapacity = async (restaurantId) => {
-    try {
-      const tables = await prisma.table.findMany({
-        where: { restaurantId },
-        select: { capacity: true },
-      });
-  
-      return tables.reduce((sum, table) => sum + table.capacity, 0);
-    } catch (error) {
-      throw new Error("Error calculating capacity: " + error.message);
-    }
-  };
+    return availableTables.length > 0;
+  } catch (error) {
+    throw new Error("Error checking availability: " + error.message);
+  }
+};
 
-  export const manageWaitlist = async (data) => {
-    try {
-      
-      const tableAvailable = await checkAvailability(data.restaurantId, data.date, data.guestCount);
-  
-      if (tableAvailable) {
-       
-        return await createReservation(data);
-      } else {
-        
-        const waitlistEntry = await prisma.waitlist.create({
-          data: {
-            restaurantId: data.restaurantId,
-            userId: data.userId,
-            timeSlotId: data.timeSlotId,
-            guestCount: data.guestCount,
-            rank: 0, 
-          },
-        });
-  
-        return waitlistEntry;
-      }
-    } catch (error) {
-      
-      throw new Error("Error managing waitlist: " + error.message);
+export const calculateCapacity = async (restaurantId) => {
+  try {
+    const tables = await prisma.table.findMany({
+      where: { restaurantId },
+      select: { capacity: true },
+    });
+
+    return tables.reduce((sum, table) => sum + table.capacity, 0);
+  } catch (error) {
+    throw new Error("Error calculating capacity: " + error.message);
+  }
+};
+
+export const manageWaitlist = async (data) => {
+  try {
+    const tableAvailable = await checkAvailability(
+      data.restaurantId,
+      data.date,
+      data.guestCount
+    );
+
+    if (tableAvailable) {
+      return await createReservation(data);
+    } else {
+      const waitlistEntry = await prisma.waitlist.create({
+        data: {
+          restaurantId: data.restaurantId,
+          userId: data.userId,
+          timeSlotId: data.timeSlotId,
+          guestCount: data.guestCount,
+          rank: 0,
+        },
+      });
+
+      return waitlistEntry;
     }
-  };
+  } catch (error) {
+    throw new Error("Error managing waitlist: " + error.message);
+  }
+};

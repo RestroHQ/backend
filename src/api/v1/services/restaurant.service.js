@@ -1,6 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { saveFile } from "@/lib/files";
-import { createId } from "@paralleldrive/cuid2";
 
 export const createRestaurant = async (data, ownerId) => {
   const existingRestaurant = await prisma.restaurant.findUnique({
@@ -11,30 +9,12 @@ export const createRestaurant = async (data, ownerId) => {
     throw new Error("Restaurant with this email already exists");
   }
 
-  const restaurantId = createId();
-
   let logoPath = null;
   let coverImagePath = null;
-
-  if (data.logo) {
-    logoPath = await saveFile("restaurants", restaurantId, "logo", data.logo);
-  }
-
-  if (data.coverImage) {
-    coverImagePath = await saveFile(
-      "restaurants",
-      restaurantId,
-      "cover",
-      data.coverImage
-    );
-  }
 
   const restaurant = await prisma.restaurant.create({
     data: {
       ...data,
-      id: restaurantId,
-      logo: logoPath,
-      coverImage: coverImagePath,
       ownerId: ownerId,
     },
   });
@@ -55,28 +35,10 @@ export const updateRestaurant = async (id, data, userId) => {
     throw new Error("Unauthorized to update this restaurant");
   }
 
-  let logoPath = restaurant.logo;
-  let coverImagePath = restaurant.coverImage;
-
-  if (data.logo) {
-    logoPath = await saveFile("restaurants", id, "logo", data.logo);
-  }
-
-  if (data.coverImage) {
-    coverImagePath = await saveFile(
-      "restaurants",
-      id,
-      "cover",
-      data.coverImage
-    );
-  }
-
   const updatedRestaurant = await prisma.restaurant.update({
     where: { id },
     data: {
       ...data,
-      logo: logoPath,
-      coverImage: coverImagePath,
     },
   });
 

@@ -1,13 +1,12 @@
-import { UPLOAD_DIR } from "@/lib/files";
 import express from "express";
-import path from "path";
+import * as s3Controller from "../controllers/s3.controller";
 
 const router = express.Router();
 
-router.get("/files/:type/:id/:filename", (req, res) => {
-  const { type, id, filename } = req.params;
-  const filePath = path.join(UPLOAD_DIR, type, id, filename);
-  res.sendFile(filePath);
-});
+router.post("/upload", s3Controller.getUploadUrl);
+
+router.get("/download/:fileName", s3Controller.getDownloadUrl);
+
+router.post("/batch-download", s3Controller.getBatchDownloadUrls);
 
 export const fileRouter = router;

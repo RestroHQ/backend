@@ -1,11 +1,9 @@
-import { fileRouter } from "@/api/v1/routes/file.routes";
 import { config } from "@/lib/config";
-import { createUploadDirs } from "@/lib/files";
 import { calcUptime } from "@/lib/utils";
 import cors from "cors";
 import express from "express";
-import { authRouter } from "./api/v1/routes/auth.routes";
 import { apiRouter } from "./api";
+import { seedDB } from "./lib/seed";
 
 const app = express();
 const port = config.PORT || 4000;
@@ -13,7 +11,7 @@ const port = config.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-createUploadDirs();
+seedDB();
 
 app.get("/", (req, res) => {
   res.json({
@@ -29,7 +27,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", apiRouter);
-app.use(fileRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port http://localhost:${port}`);
