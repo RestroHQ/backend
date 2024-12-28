@@ -25,7 +25,7 @@ router.post(
   reservationController.createReservation
 );
 
-router.put(
+router.patch(
   "/:id",
   authenticate,
   authorize(["SUPERADMIN", "ADMIN", "USER"]),

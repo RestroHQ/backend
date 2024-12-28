@@ -9,9 +9,6 @@ export const createRestaurant = async (data, ownerId) => {
     throw new Error("Restaurant with this email already exists");
   }
 
-  let logoPath = null;
-  let coverImagePath = null;
-
   const restaurant = await prisma.restaurant.create({
     data: {
       ...data,

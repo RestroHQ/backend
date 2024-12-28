@@ -17,15 +17,15 @@ router.get(
   authorize(["SUPERADMIN", "ADMIN"]),
   userController.getUserById
 );
-router.put("/:id", authenticate, userController.updateUser);
-router.put(
+router.patch("/:id", authenticate, userController.updateUser);
+router.patch(
   "/:id/role",
   authenticate,
   authorize(["SUPERADMIN"]),
   userController.updateUserRole
 );
 router.delete("/:id", authenticate, userController.deleteUser);
-router.put(
+router.patch(
   "/:id/restore",
   authenticate,
   authorize(["SUPERADMIN"]),

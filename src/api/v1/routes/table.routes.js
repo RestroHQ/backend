@@ -16,7 +16,7 @@ router.post(
   tableController.createTable
 );
 
-router.put(
+router.patch(
   "/:id",
   authenticate,
   authorize(["SUPERADMIN", "ADMIN"]),
