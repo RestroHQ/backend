@@ -46,6 +46,7 @@ export const login = async (data) => {
     include: {
       staffAt: {
         select: {
+          id: true,
           restaurantId: true,
         },
       },
@@ -61,14 +62,15 @@ export const login = async (data) => {
     throw new Error("Invalid credentials");
   }
 
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-    expiresIn: "24h",
-  });
+  const token = jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: config.JWT_EXPIRES_IN,
+    }
+  );
 
   const { password, ...userWithoutPassword } = user;
-
-  user.restaursnts = user.staffAt?.map(({ restaurantId }) => restaurantId);
-  user.staffAt = undefined;
 
   return {
     user: userWithoutPassword,
