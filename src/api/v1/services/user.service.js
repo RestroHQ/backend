@@ -30,16 +30,19 @@ export const getUserById = async (id) => {
       isActive: true,
       deletedAt: null,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      username: true,
-      phone: true,
-      role: true,
-      image: true,
-      createdAt: true,
-      updatedAt: true,
+    include: {
+      staffAt: {
+        select: {
+          id: true,
+          restaurantId: true,
+          restaurant: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -47,7 +50,8 @@ export const getUserById = async (id) => {
     throw new Error("User not found");
   }
 
-  return user;
+  const { password, ...userWithoutPassword } = user;
+  return userWithoutPassword;
 };
 
 export const updateUserRole = async (id, role, adminUser) => {
