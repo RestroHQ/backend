@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { generateDownloadUrl } from "./s3.service";
 
 export const createRestaurant = async (data, ownerId) => {
   const existingRestaurant = await prisma.restaurant.findUnique({
@@ -104,6 +105,17 @@ export const getRestaurantById = async (id) => {
 
   if (!restaurant) {
     throw new Error("Restaurant not found");
+  }
+
+  if (restaurant.logo) {
+    restaurant.logo = await generateDownloadUrl(restaurant.logo, 604800);
+  }
+
+  if (restaurant.coverImage) {
+    restaurant.coverImage = await generateDownloadUrl(
+      restaurant.coverImage,
+      604800
+    );
   }
 
   return restaurant;
