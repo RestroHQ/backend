@@ -28,11 +28,6 @@ RUN pnpm dlx prisma generate
 # Copy source code
 COPY . .
 
-# Create uploads directory with proper permissions
-RUN mkdir -p /usr/src/app/uploads/users && \
-    mkdir -p /usr/src/app/uploads/restaurants && \
-    chown -R node:node /usr/src/app/uploads
-
 # Build using Babel
 RUN pnpm run build
 
@@ -40,7 +35,6 @@ RUN pnpm run build
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3001
-ENV UPLOAD_DIR=/usr/src/app/uploads
 
 # Expose the port the app runs on
 EXPOSE 3001
