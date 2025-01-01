@@ -229,3 +229,11 @@ enum PaymentStatus {
   REFUNDED
   PARTIALLY_REFUNDED
 }
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  DIGITAL_WALLET
+  BANK_TRANSFER
+}
