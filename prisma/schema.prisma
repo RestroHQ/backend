@@ -169,3 +169,22 @@ model Waitlist {
   @@index([userId])
   @@index([timeSlotId])
 }
+
+model Review {
+  id           String   @id @default(cuid())
+  restaurantId String   
+  userId       String   
+  rating       Int      
+  content      String   
+  isVerified   Boolean  @default(false) 
+  isSpam       Boolean  @default(false) 
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@index([restaurantId, userId])
+  @@fulltext([content]) 
+}
+
