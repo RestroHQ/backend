@@ -213,3 +213,11 @@ model OrderItem {
 
   @@index([orderId])
 }
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
