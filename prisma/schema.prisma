@@ -38,6 +38,7 @@ model User {
   ownedRestaurants Restaurant[]  @relation("RestaurantOwner")
   reservations     Reservation[]
   waitlists        Waitlist[]
+  orders    Order[]
 }
 
 model Restaurant {
@@ -69,6 +70,7 @@ model Restaurant {
   reservations      Reservation[]
   timeSlots         TimeSlot[]
   waitlists         Waitlist[]
+  orders    Order[] 
 
   owner User @relation("RestaurantOwner", fields: [ownerId], references: [id])
 
@@ -176,6 +178,10 @@ model Order {
   userId        String?       
   tableId       String?       
   orderNumber   String        @unique 
+  orderType      OrderType  @default(DINE_IN) 
+  deliveryAddress String? 
+  deliveryFee    Decimal?   @db.Decimal(10, 2)  
+  discountAmount Decimal?   @db.Decimal(10, 2)
   subtotal      Decimal       @db.Decimal(10, 2)
   tax           Decimal       @db.Decimal(10, 2)
   total         Decimal       @db.Decimal(10, 2)
