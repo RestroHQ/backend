@@ -196,3 +196,20 @@ model Order {
   @@index([tableId])
   @@index([orderNumber])
 }
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  name         String   
+  description  String? 
+  quantity     Int
+  unitPrice    Decimal  @db.Decimal(10, 2)
+  totalPrice   Decimal  @db.Decimal(10, 2)
+  notes        String?  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  order        Order    @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
