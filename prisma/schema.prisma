@@ -169,3 +169,18 @@ model Waitlist {
   @@index([userId])
   @@index([timeSlotId])
 }
+
+model MenuCategory {
+  id           String      @id @default(cuid())
+  name         String
+  description  String?
+  restaurantId String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  menuItems  MenuItem[]
+
+  @@index([restaurantId])
+}
+
