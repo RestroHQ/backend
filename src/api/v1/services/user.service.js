@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { restore, softDelete } from "./base.service";
+import { generateDownloadUrl } from "./s3.service";
 
 export const getAllUsers = async () => {
   const users = await prisma.user.findMany({
@@ -48,6 +49,10 @@ export const getUserById = async (id) => {
 
   if (!user) {
     throw new Error("User not found");
+  }
+
+  if (user.image) {
+    user.image = await generateDownloadUrl(user.image);
   }
 
   const { password, ...userWithoutPassword } = user;
