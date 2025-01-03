@@ -6,6 +6,12 @@ import { fileRouter } from "./routes/file.routes";
 import { menuRouter } from "./routes/menu.routes";
 
 const router = Router();
+const express = require('express');
+const reviewRoutes = require('./routes/reviewRoutes');
+
+const app= express();
+app.use(express.json());
+app.use('.reviews',reviewRoutes);
 
 router.get("/", (req, res) => {
   res.json({
@@ -22,3 +28,4 @@ router.use("/files", fileRouter);
 router.use("/menus", menuRouter);
 
 export const v1Router = router;
+module.exports = app;
