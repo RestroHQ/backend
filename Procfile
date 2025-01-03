@@ -1,1 +1,1 @@
-web: node src/index.js
+web: npm install && npm run build && npm run start

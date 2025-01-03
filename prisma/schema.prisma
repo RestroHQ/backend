@@ -249,3 +249,78 @@ enum PaymentMethod {
   DIGITAL_WALLET
   BANK_TRANSFER
 }
+model MenuCategory {
+  id           String      @id @default(cuid())
+  name         String
+  description  String?
+  restaurantId String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  menuItems  MenuItem[]
+
+  @@index([restaurantId])
+}
+
+model MenuItem {
+  id             String      @id @default(cuid())
+  name           String
+  description    String?
+  price          Float
+  imageUrl       String?
+  isAvailable    Boolean     @default(true)
+  categoryId     String
+  restaurantId   String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  category       MenuCategory @relation(fields: [categoryId], references: [id])
+  restaurant     Restaurant   @relation(fields: [restaurantId], references: [id])
+
+  @@index([categoryId])
+  @@index([restaurantId])
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Review {
+  id           String       @id @default(cuid())
+  restaurantId String
+  userId       String
+  rating       Int         @default(0)
+  content      String      @db.Text
+  status       ReviewStatus @default(PENDING)
+  reportCount  Int         @default(0)
+  isVerified   Boolean     @default(false)
+  searchVector Unsupported("tsvector")?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+  reports      Report[]
+
+  @@index([restaurantId])
+  @@index([userId])
+  @@index([searchVector], type: Gin)
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  reviewId  String
+  userId    String
+  reason    String
+  createdAt DateTime @default(now())
+  
+  review    Review   @relation(fields: [reviewId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([reviewId])
+  @@index([userId])
+}
+
