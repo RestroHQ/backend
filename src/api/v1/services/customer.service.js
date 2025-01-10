@@ -63,9 +63,9 @@ async function getOrderHistory(req, res) {
   }
 }
 
-module.exports = {
-  createCustomer,
-  getCustomerProfile,
-  updateCustomerProfile,
-  getOrderHistory,
-};
+module.exports={
+    createCustomer,
+    getCustomerProfile,
+    updateCustomerProfile,
+    getOrderHistory
+}
