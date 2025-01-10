@@ -4,14 +4,9 @@ import { userRouter } from "./routes/user.routes";
 import { restaurantRouter } from "./routes/restaurant.routes";
 import { fileRouter } from "./routes/file.routes";
 import { menuRouter } from "./routes/menu.routes";
+import { reviewRoutes } from "./routes/review.routes";
 
 const router = Router();
-const express = require('express');
-const reviewRoutes = require('./routes/reviewRoutes');
-
-const app= express();
-app.use(express.json());
-app.use('.reviews',reviewRoutes);
 
 router.get("/", (req, res) => {
   res.json({
@@ -26,6 +21,6 @@ router.use("/users", userRouter);
 router.use("/restaurants", restaurantRouter);
 router.use("/files", fileRouter);
 router.use("/menus", menuRouter);
+router.use("/reviews", reviewRoutes);
 
 export const v1Router = router;
-module.exports = app;

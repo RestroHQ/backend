@@ -1,4 +1,4 @@
-const reviewService = require('../services/reviewService');
+const reviewService = require("../services/review.service");
 
 // Submit a review
 async function submitReview(req, res) {

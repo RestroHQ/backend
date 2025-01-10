@@ -1,4 +1,4 @@
-const menuService = require('../services/menuService');
+const menuService = require("../services/menu.service");
 
 // Controller for creating a menu category
 const createMenuCategory = async (req, res, next) => {
@@ -15,7 +15,8 @@ const createMenuCategory = async (req, res, next) => {
 const getMenuCategoriesByRestaurant = async (req, res, next) => {
   try {
     const { restaurantId } = req.params;
-    const categories = await menuService.getMenuCategoriesByRestaurant(restaurantId);
+    const categories =
+      await menuService.getMenuCategoriesByRestaurant(restaurantId);
     res.json(categories);
   } catch (error) {
     next(error);
