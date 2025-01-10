@@ -14,6 +14,11 @@ export const registerSchema = z.object({
     ),
   phone: z.string().optional(),
   username: z.string().max(50).optional(),
+  role: z
+    .enum(["USER"], {
+      message: "Invalid role. Set role to USER or remove the field",
+    })
+    .optional(),
   image: z.string().optional(),
 });
 

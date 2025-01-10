@@ -9,7 +9,7 @@ datasource db {
 
 enum Role {
   ADMIN
-  STAFF
+  USER
 }
 
 enum RestaurantRole {
@@ -73,16 +73,17 @@ model User {
   id                   String    @id @default(cuid())
   name                 String
   email                String    @unique
+  username             String?   @unique
   password             String
   passwordResetToken   String?
   passwordResetExpires DateTime?
   phone                String?   @db.VarChar(20)
-  role                 Role      @default(STAFF)
+  role                 Role      @default(USER)
   image                String?
   isActive             Boolean   @default(true)
 
   ownedRestaurants Restaurant[]      @relation("RestaurantOwner")
-  staffAssignments RestaurantStaff[]
+  staffAt          RestaurantStaff[]
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -96,6 +97,7 @@ model Customer {
   id                   String    @id @default(cuid())
   name                 String
   email                String    @unique
+  username             String?   @unique
   password             String
   passwordResetToken   String?
   passwordResetExpires DateTime?
@@ -163,7 +165,7 @@ model RestaurantStaff {
   restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([restaurantId, userId, role])
+  @@unique([restaurantId, userId])
   @@index([restaurantId, role])
 }
 
