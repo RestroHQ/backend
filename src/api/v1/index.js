@@ -20,7 +20,7 @@ router.use("/auth", authRouter);
 router.use("/users", userRouter);
 router.use("/restaurants", restaurantRouter);
 router.use("/files", fileRouter);
-router.use("/menus", menuRouter);
-router.use("/reviews", reviewRoutes);
+// router.use("/menus", menuRouter);
+// router.use("/reviews", reviewRoutes);
 
 export const v1Router = router;

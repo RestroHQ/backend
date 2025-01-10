@@ -29,6 +29,7 @@ export const register = async (data) => {
       ...data,
       id: userId,
       password: hashedPassword,
+      role: "USER",
     },
   });
 
