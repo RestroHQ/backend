@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { restore, softDelete } from "./base.service";
-import { saveFile } from "@/lib/files";
+import { generateDownloadUrl } from "./s3.service";
 
 export const getAllUsers = async () => {
   const users = await prisma.user.findMany({
@@ -31,16 +31,19 @@ export const getUserById = async (id) => {
       isActive: true,
       deletedAt: null,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      username: true,
-      phone: true,
-      role: true,
-      image: true,
-      createdAt: true,
-      updatedAt: true,
+    include: {
+      staffAt: {
+        select: {
+          id: true,
+          restaurantId: true,
+          restaurant: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -48,7 +51,12 @@ export const getUserById = async (id) => {
     throw new Error("User not found");
   }
 
-  return user;
+  if (user.image) {
+    user.image = await generateDownloadUrl(user.image);
+  }
+
+  const { password, ...userWithoutPassword } = user;
+  return userWithoutPassword;
 };
 
 export const updateUserRole = async (id, role, adminUser) => {
@@ -83,17 +91,10 @@ export const updateUser = async (id, data) => {
     throw new Error("You can't update another user's profile");
   }
 
-  let imagePath = user.image;
-
-  if (data.image) {
-    imagePath = await saveFile("users", user.id, data.image);
-  }
-
   const updatedUser = await prisma.user.update({
     where: { id },
     data: {
       ...data,
-      image: imagePath,
     },
     select: {
       id: true,

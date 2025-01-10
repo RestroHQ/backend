@@ -35,14 +35,17 @@ model User {
   updatedAt DateTime          @updatedAt
   staffAt   RestaurantStaff[]
 
-  ownedRestaurants Restaurant[] @relation("RestaurantOwner")
+  ownedRestaurants Restaurant[]  @relation("RestaurantOwner")
+  reservations     Reservation[]
+  waitlists        Waitlist[]
+  orders    Order[]
 }
 
 model Restaurant {
   id          String           @id @default(cuid())
   name        String
-  address     String
-  phone       String
+  address     String?
+  phone       String?
   email       String           @unique
   website     String?
   logo        String?
@@ -63,6 +66,11 @@ model Restaurant {
   capacity          Int?
   isDeliveryEnabled Boolean           @default(false)
   staff             RestaurantStaff[]
+  tables            Table[]
+  reservations      Reservation[]
+  timeSlots         TimeSlot[]
+  waitlists         Waitlist[]
+  orders    Order[] 
 
   owner User @relation("RestaurantOwner", fields: [ownerId], references: [id])
 
@@ -81,6 +89,7 @@ model RestaurantStaff {
   @@index([restaurantId])
   @@index([userId])
 }
+
 
 model Customer {
   id          String   @id @default(cuid())
@@ -104,4 +113,239 @@ model Order {
 
   customer    Customer @relation(fields: [customerId], references: [id])
   restaurant  Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+
+model Table {
+  id           String   @id @default(cuid())
+  restaurantId String
+  name         String
+  capacity     Int
+  isAvailable  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  reservations Reservation[]
+
+  @@index([restaurantId])
+}
+
+model Reservation {
+  id           String            @id @default(cuid())
+  restaurantId String
+  tableId      String
+  userId       String
+  timeSlotId   String
+  guestCount   Int
+  status       ReservationStatus @default(PENDING)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  table      Table      @relation(fields: [tableId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  timeSlot   TimeSlot   @relation(fields: [timeSlotId], references: [id])
+
+  @@index([restaurantId])
+  @@index([tableId])
+  @@index([userId])
+  @@index([timeSlotId])
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model TimeSlot {
+  id           String   @id @default(cuid())
+  restaurantId String
+  startTime    DateTime
+  endTime      DateTime
+  capacity     Int
+  isAvailable  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reservations Reservation[]
+  waitlists    Waitlist[]
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@index([restaurantId, startTime, endTime])
+}
+
+model Waitlist {
+  id           String   @id @default(cuid())
+  restaurantId String
+  userId       String
+  timeSlotId   String
+  guestCount   Int
+  rank         Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  timeSlot   TimeSlot   @relation(fields: [timeSlotId], references: [id])
+
+  @@unique([restaurantId, userId, timeSlotId])
+  @@index([restaurantId])
+  @@index([userId])
+  @@index([timeSlotId])
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  restaurantId  String
+  userId        String?       
+  tableId       String?       
+  orderNumber   String        @unique 
+  orderType      OrderType  @default(DINE_IN) 
+  deliveryAddress String? 
+  deliveryFee    Decimal?   @db.Decimal(10, 2)  
+  discountAmount Decimal?   @db.Decimal(10, 2)
+  subtotal      Decimal       @db.Decimal(10, 2)
+  tax           Decimal       @db.Decimal(10, 2)
+  total         Decimal       @db.Decimal(10, 2)
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod?
+  notes         String?       
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
+  user          User?         @relation(fields: [userId], references: [id])
+  table         Table?        @relation(fields: [tableId], references: [id])
+  items         OrderItem[]
+
+  @@index([restaurantId])
+  @@index([userId])
+  @@index([tableId])
+  @@index([orderNumber])
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  name         String   
+  description  String? 
+  quantity     Int
+  unitPrice    Decimal  @db.Decimal(10, 2)
+  totalPrice   Decimal  @db.Decimal(10, 2)
+  notes        String?  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  order        Order    @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
+
+enum OrderType {
+  DINE_IN    
+  TAKEAWAY   
+  DELIVERY   
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  DIGITAL_WALLET
+  BANK_TRANSFER
+}
+model MenuCategory {
+  id           String      @id @default(cuid())
+  name         String
+  description  String?
+  restaurantId String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  menuItems  MenuItem[]
+
+  @@index([restaurantId])
+}
+
+model MenuItem {
+  id             String      @id @default(cuid())
+  name           String
+  description    String?
+  price          Float
+  imageUrl       String?
+  isAvailable    Boolean     @default(true)
+  categoryId     String
+  restaurantId   String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  category       MenuCategory @relation(fields: [categoryId], references: [id])
+  restaurant     Restaurant   @relation(fields: [restaurantId], references: [id])
+
+  @@index([categoryId])
+  @@index([restaurantId])
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Review {
+  id           String       @id @default(cuid())
+  restaurantId String
+  userId       String
+  rating       Int         @default(0)
+  content      String      @db.Text
+  status       ReviewStatus @default(PENDING)
+  reportCount  Int         @default(0)
+  isVerified   Boolean     @default(false)
+  searchVector Unsupported("tsvector")?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+  reports      Report[]
+
+  @@index([restaurantId])
+  @@index([userId])
+  @@index([searchVector], type: Gin)
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  reviewId  String
+  userId    String
+  reason    String
+  createdAt DateTime @default(now())
+  
+  review    Review   @relation(fields: [reviewId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([reviewId])
+  @@index([userId])
 }

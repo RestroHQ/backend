@@ -2,8 +2,16 @@ import { Router } from "express";
 import { authRouter } from "./routes/auth.routes";
 import { userRouter } from "./routes/user.routes";
 import { restaurantRouter } from "./routes/restaurant.routes";
+import { fileRouter } from "./routes/file.routes";
+import { menuRouter } from "./routes/menu.routes";
 
 const router = Router();
+const express = require('express');
+const reviewRoutes = require('./routes/reviewRoutes');
+
+const app= express();
+app.use(express.json());
+app.use('.reviews',reviewRoutes);
 
 router.get("/", (req, res) => {
   res.json({
@@ -16,5 +24,8 @@ router.get("/", (req, res) => {
 router.use("/auth", authRouter);
 router.use("/users", userRouter);
 router.use("/restaurants", restaurantRouter);
+router.use("/files", fileRouter);
+router.use("/menus", menuRouter);
 
 export const v1Router = router;
+module.exports = app;

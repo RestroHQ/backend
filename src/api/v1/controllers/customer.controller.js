@@ -1,4 +1,4 @@
-const prisma = require('../../../../utils/prisma');
+const prisma = require("../../../../utils/prisma");
 
 exports.getAllCustomers = async (req, res) => {
     try {
@@ -90,4 +90,3 @@ exports.getAllCustomers = async (req, res) => {
       res.status(500).json({ error: 'Failed to fetch analytics' });
     }
   };
-  
