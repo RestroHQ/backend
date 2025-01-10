@@ -8,149 +8,22 @@ datasource db {
 }
 
 enum Role {
-  SUPERADMIN
   ADMIN
+  STAFF
+}
+
+enum RestaurantRole {
+  OWNER
+  MANAGER
   CASHIER
-  USER
+  WAITER
+  CHEF
 }
 
 enum RestaurantStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
-}
-
-model User {
-  id        String            @id @default(cuid())
-  name      String?
-  username  String?           @unique
-  email     String            @unique
-  password  String
-  phone     String?
-  role      Role              @default(USER)
-  image     String?
-  isActive  Boolean           @default(true)
-  deletedAt DateTime?
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  staffAt   RestaurantStaff[]
-
-  ownedRestaurants Restaurant[]  @relation("RestaurantOwner")
-  reservations     Reservation[]
-  waitlists        Waitlist[]
-  orders    Order[]
-}
-
-model Restaurant {
-  id          String           @id @default(cuid())
-  name        String
-  address     String?
-  phone       String?
-  email       String           @unique
-  website     String?
-  logo        String?
-  coverImage  String?
-  cuisineType String
-  status      RestaurantStatus @default(ACTIVE)
-  ownerId     String
-  deletedAt   DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  openingTime String
-  closingTime String
-  openDays    String[]
-
-  taxNumber         String?
-  description       String?
-  capacity          Int?
-  isDeliveryEnabled Boolean           @default(false)
-  staff             RestaurantStaff[]
-  tables            Table[]
-  reservations      Reservation[]
-  timeSlots         TimeSlot[]
-  waitlists         Waitlist[]
-  orders    Order[] 
-
-  owner User @relation("RestaurantOwner", fields: [ownerId], references: [id])
-
-  @@index([ownerId])
-}
-
-model RestaurantStaff {
-  id           String     @id @default(cuid())
-  restaurantId String
-  userId       String
-  joinedAt     DateTime   @default(now())
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
-  user         User       @relation(fields: [userId], references: [id])
-
-  @@unique([restaurantId, userId])
-  @@index([restaurantId])
-  @@index([userId])
-}
-
-
-model Customer {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  loyaltyPoints Int     @default(0)
-  tier        String   @default("Bronze") // Example tiers: Bronze, Silver, Gold
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        User     @relation(fields: [userId], references: [id])
-  orders      Order[]  // Relation to track order history
-}
-
-model Order {
-  id          String   @id @default(cuid())
-  customerId  String
-  restaurantId String
-  totalAmount Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  customer    Customer @relation(fields: [customerId], references: [id])
-  restaurant  Restaurant @relation(fields: [restaurantId], references: [id])
-}
-
-
-model Table {
-  id           String   @id @default(cuid())
-  restaurantId String
-  name         String
-  capacity     Int
-  isAvailable  Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
-  reservations Reservation[]
-
-  @@index([restaurantId])
-}
-
-model Reservation {
-  id           String            @id @default(cuid())
-  restaurantId String
-  tableId      String
-  userId       String
-  timeSlotId   String
-  guestCount   Int
-  status       ReservationStatus @default(PENDING)
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  table      Table      @relation(fields: [tableId], references: [id])
-  user       User       @relation(fields: [userId], references: [id])
-  timeSlot   TimeSlot   @relation(fields: [timeSlotId], references: [id])
-
-  @@index([restaurantId])
-  @@index([tableId])
-  @@index([userId])
-  @@index([timeSlotId])
 }
 
 enum ReservationStatus {
@@ -160,96 +33,10 @@ enum ReservationStatus {
   COMPLETED
 }
 
-model TimeSlot {
-  id           String   @id @default(cuid())
-  restaurantId String
-  startTime    DateTime
-  endTime      DateTime
-  capacity     Int
-  isAvailable  Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  reservations Reservation[]
-  waitlists    Waitlist[]
-
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-
-  @@index([restaurantId, startTime, endTime])
-}
-
-model Waitlist {
-  id           String   @id @default(cuid())
-  restaurantId String
-  userId       String
-  timeSlotId   String
-  guestCount   Int
-  rank         Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  user       User       @relation(fields: [userId], references: [id])
-  timeSlot   TimeSlot   @relation(fields: [timeSlotId], references: [id])
-
-  @@unique([restaurantId, userId, timeSlotId])
-  @@index([restaurantId])
-  @@index([userId])
-  @@index([timeSlotId])
-}
-
-model Order {
-  id            String        @id @default(cuid())
-  restaurantId  String
-  userId        String?       
-  tableId       String?       
-  orderNumber   String        @unique 
-  orderType      OrderType  @default(DINE_IN) 
-  deliveryAddress String? 
-  deliveryFee    Decimal?   @db.Decimal(10, 2)  
-  discountAmount Decimal?   @db.Decimal(10, 2)
-  subtotal      Decimal       @db.Decimal(10, 2)
-  tax           Decimal       @db.Decimal(10, 2)
-  total         Decimal       @db.Decimal(10, 2)
-  status        OrderStatus   @default(PENDING)
-  paymentStatus PaymentStatus @default(PENDING)
-  paymentMethod PaymentMethod?
-  notes         String?       
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  
-  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
-  user          User?         @relation(fields: [userId], references: [id])
-  table         Table?        @relation(fields: [tableId], references: [id])
-  items         OrderItem[]
-
-  @@index([restaurantId])
-  @@index([userId])
-  @@index([tableId])
-  @@index([orderNumber])
-}
-
-model OrderItem {
-  id           String   @id @default(cuid())
-  orderId      String
-  name         String   
-  description  String? 
-  quantity     Int
-  unitPrice    Decimal  @db.Decimal(10, 2)
-  totalPrice   Decimal  @db.Decimal(10, 2)
-  notes        String?  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  order        Order    @relation(fields: [orderId], references: [id])
-
-  @@index([orderId])
-}
-
 enum OrderType {
-  DINE_IN    
-  TAKEAWAY   
-  DELIVERY   
+  DINE_IN
+  TAKEAWAY
+  DELIVERY
 }
 
 enum OrderStatus {
@@ -275,38 +62,6 @@ enum PaymentMethod {
   DIGITAL_WALLET
   BANK_TRANSFER
 }
-model MenuCategory {
-  id           String      @id @default(cuid())
-  name         String
-  description  String?
-  restaurantId String
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  menuItems  MenuItem[]
-
-  @@index([restaurantId])
-}
-
-model MenuItem {
-  id             String      @id @default(cuid())
-  name           String
-  description    String?
-  price          Float
-  imageUrl       String?
-  isAvailable    Boolean     @default(true)
-  categoryId     String
-  restaurantId   String
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-
-  category       MenuCategory @relation(fields: [categoryId], references: [id])
-  restaurant     Restaurant   @relation(fields: [restaurantId], references: [id])
-
-  @@index([categoryId])
-  @@index([restaurantId])
-}
 
 enum ReviewStatus {
   PENDING
@@ -314,38 +69,313 @@ enum ReviewStatus {
   REJECTED
 }
 
+model User {
+  id                   String    @id @default(cuid())
+  name                 String
+  email                String    @unique
+  password             String
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  phone                String?   @db.VarChar(20)
+  role                 Role      @default(STAFF)
+  image                String?
+  isActive             Boolean   @default(true)
+
+  ownedRestaurants Restaurant[]      @relation("RestaurantOwner")
+  staffAssignments RestaurantStaff[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([email, role])
+  @@index([phone])
+}
+
+model Customer {
+  id                   String    @id @default(cuid())
+  name                 String
+  email                String    @unique
+  password             String
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  phone                String?   @db.VarChar(20)
+  image                String?
+  isActive             Boolean   @default(true)
+  restaurantId         String
+
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  orders       Order[]
+  reservations Reservation[]
+  waitlists    Waitlist[]
+  reviews      Review[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([email])
+  @@index([phone])
+  @@index([restaurantId])
+}
+
+model Restaurant {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  description String?
+  phone       String?          @db.VarChar(20)
+  email       String?
+  address     String?
+  image       String?
+  status      RestaurantStatus @default(ACTIVE)
+  isActive    Boolean          @default(true)
+  ownerId     String
+
+  staff        RestaurantStaff[]
+  orders       Order[]           @relation("RestaurantOrders")
+  tables       Table[]           @relation("RestaurantTables")
+  reservations Reservation[]     @relation("RestaurantReservations")
+  timeSlots    TimeSlot[]        @relation("RestaurantTimeSlots")
+  waitlists    Waitlist[]        @relation("RestaurantWaitlists")
+  menus        Menu[]            @relation("RestaurantMenus")
+  reviews      Review[]          @relation("RestaurantReviews")
+  customers    Customer[]
+  emailsList   EmailsList[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  owner User @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+
+  @@index([ownerId])
+  @@index([status, isActive])
+}
+
+model RestaurantStaff {
+  id           String         @id @default(cuid())
+  restaurantId String
+  userId       String
+  role         RestaurantRole
+  joinedAt     DateTime       @default(now())
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, userId, role])
+  @@index([restaurantId, role])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  restaurantId    String
+  customerId      String
+  tableId         String?
+  orderType       OrderType   @default(DINE_IN)
+  deliveryAddress String?
+  deliveryFee     Decimal?    @db.Decimal(10, 2)
+  discountAmount  Decimal?    @db.Decimal(10, 2)
+  subtotal        Decimal     @db.Decimal(10, 2)
+  tax             Decimal     @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PENDING)
+  notes           String?
+
+  items    OrderItem[]
+  payments OrderPayment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  restaurant Restaurant @relation("RestaurantOrders", fields: [restaurantId], references: [id], onDelete: Restrict)
+  table      Table?     @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  @@index([restaurantId, status, createdAt])
+  @@index([customerId, createdAt])
+  @@index([tableId])
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  menuItemId String
+  name       String
+  quantity   Int
+  unitPrice  Decimal @db.Decimal(10, 2)
+  totalPrice Decimal @db.Decimal(10, 2)
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([menuItemId])
+}
+
+model OrderPayment {
+  id            String        @id @default(cuid())
+  orderId       String
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentMethod PaymentMethod
+  status        PaymentStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, status])
+}
+
+model Table {
+  id           String  @id @default(cuid())
+  restaurantId String
+  name         String
+  capacity     Int     @db.SmallInt
+  isAvailable  Boolean @default(true)
+
+  reservations Reservation[]
+  orders       Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  restaurant Restaurant @relation("RestaurantTables", fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId, isAvailable])
+}
+
+model Reservation {
+  id           String            @id @default(cuid())
+  restaurantId String
+  tableId      String
+  customerId   String
+  timeSlotId   String
+  guestCount   Int               @db.SmallInt
+  status       ReservationStatus @default(PENDING)
+  notes        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  restaurant Restaurant @relation("RestaurantReservations", fields: [restaurantId], references: [id], onDelete: Cascade)
+  table      Table      @relation(fields: [tableId], references: [id], onDelete: Restrict)
+  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  timeSlot   TimeSlot   @relation(fields: [timeSlotId], references: [id], onDelete: Restrict)
+
+  @@index([restaurantId, status, createdAt])
+  @@index([customerId, createdAt])
+  @@index([tableId])
+  @@index([timeSlotId])
+}
+
+model TimeSlot {
+  id           String   @id @default(cuid())
+  restaurantId String
+  startTime    DateTime
+  endTime      DateTime
+  capacity     Int      @db.SmallInt
+  isAvailable  Boolean  @default(true)
+
+  reservations Reservation[]
+  waitlists    Waitlist[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  restaurant Restaurant @relation("RestaurantTimeSlots", fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId, startTime, endTime])
+}
+
+model Waitlist {
+  id           String @id @default(cuid())
+  restaurantId String
+  timeSlotId   String
+  customerId   String
+  guestCount   Int    @db.SmallInt
+  rank         Int    @db.SmallInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  restaurant Restaurant @relation("RestaurantWaitlists", fields: [restaurantId], references: [id], onDelete: Cascade)
+  timeSlot   TimeSlot   @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
+  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, timeSlotId, customerId])
+  @@index([restaurantId, timeSlotId, rank])
+}
+
+model Menu {
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  restaurantId String
+  isActive     Boolean @default(true)
+
+  menuItems MenuItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  restaurant Restaurant @relation("RestaurantMenus", fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
+}
+
+model MenuItem {
+  id          String  @id @default(cuid())
+  menuId      String
+  name        String
+  description String?
+  price       Decimal @db.Decimal(10, 2)
+  imageUrl    String?
+  isAvailable Boolean @default(true)
+
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  menu Menu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@index([menuId])
+}
+
 model Review {
   id           String       @id @default(cuid())
   restaurantId String
-  userId       String
-  rating       Int         @default(0)
-  content      String      @db.Text
+  customerId   String
+  rating       Int          @db.SmallInt
+  comment      String?
   status       ReviewStatus @default(PENDING)
-  reportCount  Int         @default(0)
-  isVerified   Boolean     @default(false)
-  searchVector Unsupported("tsvector")?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
 
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
-  user         User       @relation(fields: [userId], references: [id])
-  reports      Report[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@index([restaurantId])
-  @@index([userId])
-  @@index([searchVector], type: Gin)
+  restaurant Restaurant @relation("RestaurantReviews", fields: [restaurantId], references: [id], onDelete: Cascade)
+  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId, status])
+  @@index([customerId])
 }
 
-model Report {
-  id        String   @id @default(cuid())
-  reviewId  String
-  userId    String
-  reason    String
-  createdAt DateTime @default(now())
-  
-  review    Review   @relation(fields: [reviewId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+model EmailsList {
+  id           String  @id @default(cuid())
+  restaurantId String
+  email        String  @unique
+  isActive     Boolean @default(true)
 
-  @@index([reviewId])
-  @@index([userId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@index([email, isActive])
 }

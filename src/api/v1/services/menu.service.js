@@ -1,4 +1,4 @@
-const prisma = require('../../lib/prisma');
+const prisma = require("../../../lib/prisma");
 
 // Service to create a menu category
 const createMenuCategory = async (data) => {
