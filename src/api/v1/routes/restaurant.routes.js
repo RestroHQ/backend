@@ -38,7 +38,7 @@ router.patch(
 router.delete(
   "/:id",
   authenticate,
-  authorize(["SUPERADMIN"]),
+  authorize(["USER"]),
   restaurantController.deleteRestaurant
 );
 

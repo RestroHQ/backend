@@ -188,30 +188,21 @@ export const getRestaurants = async (
       take: limit,
     });
 
-    const restaurantsWithUrls = [];
-
     restaurants.forEach(async (restaurant) => {
-      const restaurantCopy = { ...restaurant };
-
       if (restaurant.logo) {
-        restaurantCopy.logo = await generateDownloadUrl(
-          restaurant.logo,
-          604800
-        );
+        restaurant.logo = await generateDownloadUrl(restaurant.logo, 604800);
       }
 
       if (restaurant.coverImage) {
-        restaurantCopy.coverImage = await generateDownloadUrl(
+        restaurant.coverImage = await generateDownloadUrl(
           restaurant.coverImage,
           604800
         );
       }
-
-      restaurantsWithUrls.push(restaurantCopy);
     });
 
     return {
-      restaurants: restaurantsWithUrls,
+      restaurants,
       pagination: {
         total,
         page,

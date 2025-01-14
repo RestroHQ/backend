@@ -1,5 +1,6 @@
 import { config } from "@/lib/config";
 import { errorHandler } from "@/lib/error-handler";
+import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { getUserById } from "../services/user.service";
 
@@ -31,5 +32,49 @@ export const authorize = (roles) => {
       return errorHandler("Insufficient permissions", res, 403);
     }
     next();
+  };
+};
+
+export const authorizeRestaurantRole = (roles) => {
+  return async (req, res, next) => {
+    try {
+      const { user } = req;
+      const restaurantId =
+        req.params.restaurantId ||
+        req.body.restaurantId ||
+        req.query.restaurantId;
+
+      if (!restaurantId) {
+        return errorHandler("Restaurant ID is required", res, 400);
+      }
+
+      const restaurant = await prisma.restaurant.findUnique({
+        where: {
+          id: restaurantId,
+          ownerId: user.id,
+        },
+      });
+
+      if (restaurant) {
+        return next();
+      }
+
+      const staffMember = await prisma.restaurantStaff.findUnique({
+        where: {
+          restaurantId_userId: {
+            restaurantId,
+            userId: user.id,
+          },
+        },
+      });
+
+      if (!staffMember || !roles.includes(staffMember.role)) {
+        return errorHandler("Insufficient permissions", res, 403);
+      }
+
+      next();
+    } catch (error) {
+      errorHandler(error, res, 403);
+    }
   };
 };
