@@ -21,6 +21,12 @@ export const getAllUsers = async () => {
     },
   });
 
+  users.forEach(async (user) => {
+    if (user.image) {
+      user.image = await generateDownloadUrl(user.image, 604800);
+    }
+  });
+
   return users;
 };
 
@@ -75,6 +81,10 @@ export const updateUserRole = async (id, role, adminUser) => {
     },
   });
 
+  if (updatedUser.image) {
+    updatedUser.image = await generateDownloadUrl(updatedUser.image, 604800);
+  }
+
   return updatedUser;
 };
 
@@ -108,6 +118,10 @@ export const updateUser = async (id, data) => {
       updatedAt: true,
     },
   });
+
+  if (updatedUser.image) {
+    updatedUser.image = await generateDownloadUrl(updatedUser.image, 604800);
+  }
 
   return updatedUser;
 };
