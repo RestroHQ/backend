@@ -47,7 +47,7 @@ export const getRestaurantById = async (req, res) => {
   }
 };
 
-export const getUserRestaurants = async (req, res) => {
+export const getRestaurants = async (req, res) => {
   try {
     const {
       page = 1,
@@ -56,12 +56,13 @@ export const getUserRestaurants = async (req, res) => {
       sortOrder = "desc",
     } = req.query;
 
-    const result = await restaurantService.getUserRestaurants(req.user.id, {
+    const result = await restaurantService.getRestaurants(req.user, {
       page: parseInt(page),
       limit: parseInt(limit),
       sortBy,
       sortOrder,
     });
+
     res.json(result);
   } catch (error) {
     errorHandler(error, res);

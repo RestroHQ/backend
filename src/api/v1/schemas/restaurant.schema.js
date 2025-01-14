@@ -17,37 +17,78 @@ export const paginationSchema = z.object({
     .optional(),
 });
 
-export const createRestaurantSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+export const createRestaurantSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    slug: z.string().min(2, "Slug must be at least 2 characters"),
+    address: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().email("Invalid email address"),
+    website: z.string().url("Invalid website URL").optional().nullable(),
+    logo: z.string().optional().nullable(),
+    coverImage: z.string().optional().nullable(),
+    cuisineType: z
+      .string()
+      .min(2, "Cuisine type must be at least 2 characters"),
+    openingTime: z
+      .string()
+      .regex(
+        /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+        "Invalid opening time format (HH:MM)"
+      ),
+    closingTime: z
+      .string()
+      .regex(
+        /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+        "Invalid closing time format (HH:MM)"
+      ),
+    openDays: z
+      .array(z.string())
+      .min(1, "At least one open day must be selected"),
+    taxNumber: z.string().optional(),
+    description: z.string().optional(),
+    capacity: z.number().int().positive().optional(),
+    isDeliveryEnabled: z.boolean().default(false),
+  })
+  .superRefine(
+    (data) => data.slug === data.name.toLowerCase().replace(/\s/g, "-")
+  );
+
+export const updateRestaurantSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").optional(),
   address: z.string().optional(),
   phone: z.string().optional(),
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email address").optional(),
   website: z.string().url("Invalid website URL").optional().nullable(),
   logo: z.string().optional().nullable(),
   coverImage: z.string().optional().nullable(),
-  cuisineType: z.string().min(2, "Cuisine type must be at least 2 characters"),
+  cuisineType: z
+    .string()
+    .min(2, "Cuisine type must be at least 2 characters")
+    .optional(),
   openingTime: z
     .string()
     .regex(
       /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
       "Invalid opening time format (HH:MM)"
-    ),
+    )
+    .optional(),
   closingTime: z
     .string()
     .regex(
       /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
       "Invalid closing time format (HH:MM)"
-    ),
+    )
+    .optional(),
   openDays: z
     .array(z.string())
-    .min(1, "At least one open day must be selected"),
+    .min(1, "At least one open day must be selected")
+    .optional(),
   taxNumber: z.string().optional(),
   description: z.string().optional(),
   capacity: z.number().int().positive().optional(),
-  isDeliveryEnabled: z.boolean().default(false),
+  isDeliveryEnabled: z.boolean().optional(),
 });
-
-export const updateRestaurantSchema = createRestaurantSchema.partial();
 
 export const addStaffSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
