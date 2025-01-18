@@ -4,31 +4,31 @@ import { validate } from "../middlewares/validate.middleware";
 import { createTableSchema, updateTableSchema } from "../schemas/table.schema";
 import * as tableController from "../controllers/table.controller";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
-router.get("/:restaurantId", authenticate, tableController.getTables);
+// router.get("/:restaurantId", authenticate, tableController.getTables);
 
-router.post(
-  "/:restaurantId",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN"]),
-  validate(createTableSchema),
-  tableController.createTable
-);
+// router.post(
+//   "/:restaurantId",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN"]),
+//   validate(createTableSchema),
+//   tableController.createTable
+// );
 
-router.patch(
-  "/:id",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN"]),
-  validate(updateTableSchema),
-  tableController.updateTable
-);
+// router.patch(
+//   "/:id",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN"]),
+//   validate(updateTableSchema),
+//   tableController.updateTable
+// );
 
-router.delete(
-  "/:id",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN"]),
-  tableController.deleteTable
-);
+// router.delete(
+//   "/:id",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN"]),
+//   tableController.deleteTable
+// );
 
 export const tableRouter = router;

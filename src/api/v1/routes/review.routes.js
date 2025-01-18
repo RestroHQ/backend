@@ -1,14 +1,20 @@
-const express = require("express");
-const router = express.Router();
-const reviewController = require("../controllers/review.controller");
+import express from "express";
 
-// Submit a review
-router.post("/submit", reviewController.submitReview);
+const router = express.Router({ mergeParams: true });
 
-// Moderate a review
-router.post("/moderate", reviewController.moderateReview);
+// const express = require("express");
+// const router = express.Router();
+// const reviewController = require("../controllers/review.controller");
 
-// Get pending reviews
-router.get("/pending", reviewController.getPendingReviews);
+// // Submit a review
+// router.post("/submit", reviewController.submitReview);
 
-module.exports = router;
+// // Moderate a review
+// router.post("/moderate", reviewController.moderateReview);
+
+// // Get pending reviews
+// router.get("/pending", reviewController.getPendingReviews);
+
+// module.exports = router;
+
+export const reviewRouter = router;
