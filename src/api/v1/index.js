@@ -1,10 +1,8 @@
 import { Router } from "express";
 import { authRouter } from "./routes/auth.routes";
-import { userRouter } from "./routes/user.routes";
-import { restaurantRouter } from "./routes/restaurant.routes";
 import { fileRouter } from "./routes/file.routes";
-import { menuRouter } from "./routes/menu.routes";
-import { reviewRoutes } from "./routes/review.routes";
+import { restaurantRouter } from "./routes/restaurant.routes";
+import { userRouter } from "./routes/user.routes";
 
 const router = Router();
 
@@ -20,7 +18,5 @@ router.use("/auth", authRouter);
 router.use("/users", userRouter);
 router.use("/restaurants", restaurantRouter);
 router.use("/files", fileRouter);
-// router.use("/menus", menuRouter);
-// router.use("/reviews", reviewRoutes);
 
 export const v1Router = router;

@@ -15,11 +15,14 @@ export const createRestaurant = async (req, res) => {
 
 export const updateRestaurant = async (req, res) => {
   try {
+    const { restaurantId } = req.params;
+
     const restaurant = await restaurantService.updateRestaurant(
-      req.params.id,
+      restaurantId,
       req.body,
       req.user.id
     );
+
     res.json(restaurant);
   } catch (error) {
     errorHandler(error, res);
@@ -28,10 +31,13 @@ export const updateRestaurant = async (req, res) => {
 
 export const deleteRestaurant = async (req, res) => {
   try {
+    const { restaurantId } = req.params;
+
     const result = await restaurantService.deleteRestaurant(
-      req.params.id,
+      restaurantId,
       req.user.id
     );
+
     res.json(result);
   } catch (error) {
     errorHandler(error, res);
@@ -40,7 +46,10 @@ export const deleteRestaurant = async (req, res) => {
 
 export const getRestaurantById = async (req, res) => {
   try {
-    const restaurant = await restaurantService.getRestaurantById(req.params.id);
+    const { restaurantId } = req.params;
+
+    const restaurant = await restaurantService.getRestaurantById(restaurantId);
+
     res.json(restaurant);
   } catch (error) {
     errorHandler(error, res);
@@ -71,11 +80,14 @@ export const getRestaurants = async (req, res) => {
 
 export const addRestaurantStaff = async (req, res) => {
   try {
+    const { restaurantId } = req.params;
+
     const staff = await restaurantService.addRestaurantStaff(
-      req.params.id,
+      restaurantId,
       req.body,
       req.user.id
     );
+
     res.status(201).json(staff);
   } catch (error) {
     errorHandler(error, res);
@@ -84,11 +96,14 @@ export const addRestaurantStaff = async (req, res) => {
 
 export const removeRestaurantStaff = async (req, res) => {
   try {
+    const { restaurantId } = req.params;
+
     const result = await restaurantService.removeRestaurantStaff(
-      req.params.id,
+      restaurantId,
       req.params.userId,
       req.user.id
     );
+
     res.json(result);
   } catch (error) {
     errorHandler(error, res);
@@ -104,8 +119,10 @@ export const getRestaurantStaff = async (req, res) => {
       sortOrder = "desc",
     } = req.query;
 
+    const { restaurantId } = req.params;
+
     const result = await restaurantService.getRestaurantStaff(
-      req.params.id,
+      restaurantId,
       req.user.id,
       {
         page: parseInt(page),

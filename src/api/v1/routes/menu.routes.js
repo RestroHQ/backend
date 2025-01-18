@@ -1,17 +1,23 @@
-const express = require("express");
-const menuController = require("../controllers/menu.controller");
+import express from "express";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
-router.post("/menu-categories", menuController.createMenuCategory);
-router.get(
-  "/restaurants/:restaurantId/menu-categories",
-  menuController.getMenuCategoriesByRestaurant
-);
-router.post("/menu-items", menuController.createMenuItem);
-router.get(
-  "/menu-categories/:categoryId/menu-items",
-  menuController.getMenuItemsByCategory
-);
+// const express = require("express");
+// const menuController = require("../controllers/menu.controller");
 
-module.exports = router;
+// const router = express.Router();
+
+// router.post("/menu-categories", menuController.createMenuCategory);
+// router.get(
+//   "/restaurants/:restaurantId/menu-categories",
+//   menuController.getMenuCategoriesByRestaurant
+// );
+// router.post("/menu-items", menuController.createMenuItem);
+// router.get(
+//   "/menu-categories/:categoryId/menu-items",
+//   menuController.getMenuItemsByCategory
+// );
+
+// module.exports = router;
+
+export const menuRouter = router;

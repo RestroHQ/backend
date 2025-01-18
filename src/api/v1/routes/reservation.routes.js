@@ -9,65 +9,65 @@ import {
 } from "../schemas/reservation.schema";
 import * as reservationController from "../controllers/reservation.controller";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
-router.get(
-  "/:restaurantId",
-  authenticate,
-  reservationController.getReservations
-);
+// router.get(
+//   "/:restaurantId",
+//   authenticate,
+//   reservationController.getReservations
+// );
 
-router.post(
-  "/",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN", "USER"]),
-  validate(createReservationSchema),
-  reservationController.createReservation
-);
+// router.post(
+//   "/",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN", "USER"]),
+//   validate(createReservationSchema),
+//   reservationController.createReservation
+// );
 
-router.patch(
-  "/:id",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN", "USER"]),
-  validate(updateReservationSchema),
-  reservationController.updateReservation
-);
+// router.patch(
+//   "/:id",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN", "USER"]),
+//   validate(updateReservationSchema),
+//   reservationController.updateReservation
+// );
 
-router.delete(
-  "/:id",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN", "USER"]),
-  reservationController.deleteReservation
-);
+// router.delete(
+//   "/:id",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN", "USER"]),
+//   reservationController.deleteReservation
+// );
 
-router.post(
-  "/waitlist",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN", "USER"]),
-  validate(manageWaitlistSchema),
-  reservationController.manageWaitlist
-);
+// router.post(
+//   "/waitlist",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN", "USER"]),
+//   validate(manageWaitlistSchema),
+//   reservationController.manageWaitlist
+// );
 
-router.get(
-  "/waitlist/:restaurantId",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN"]),
-  reservationController.getWaitlist
-);
+// router.get(
+//   "/waitlist/:restaurantId",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN"]),
+//   reservationController.getWaitlist
+// );
 
-router.delete(
-  "/waitlist/:id",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN"]),
-  reservationController.removeFromWaitlist
-);
+// router.delete(
+//   "/waitlist/:id",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN"]),
+//   reservationController.removeFromWaitlist
+// );
 
-router.get(
-  "/availability/:restaurantId",
-  authenticate,
-  authorize(["SUPERADMIN", "ADMIN", "USER"]),
-  validate(checkAvailabilitySchema),
-  reservationController.checkAvailability
-);
+// router.get(
+//   "/availability/:restaurantId",
+//   authenticate,
+//   authorize(["SUPERADMIN", "ADMIN", "USER"]),
+//   validate(checkAvailabilitySchema),
+//   reservationController.checkAvailability
+// );
 
 export const reservationRouter = router;
