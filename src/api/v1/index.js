@@ -19,4 +19,6 @@ router.use("/users", userRouter);
 router.use("/restaurants", restaurantRouter);
 router.use("/files", fileRouter);
 
+// NOTE: Moved other routes to the `restaurant.routes.js` file
+
 export const v1Router = router;
