@@ -13,3 +13,36 @@ import {
 import { authenticateCustomer } from "../middlewares/customer.middleware";
 
 const router = express.Router({ mergeParams: true });
+
+router.get(
+    "/",
+    authenticateStaff,
+    authorizeRestaurantRole(["OWNER", "MANAGER", "CHEF", "WAITER"]),
+    validate(orderQuerySchema),
+    orderController.getOrders
+  );
+  
+  router.post(
+    "/",
+    authenticateStaff,
+    authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
+    validate(createOrderSchema),
+    orderController.createOrder
+  );
+  
+  router.patch(
+    "/:orderId/status",
+    authenticateStaff,
+    authorizeRestaurantRole(["OWNER", "MANAGER", "CHEF"]),
+    validate(updateOrderStatusSchema),
+    orderController.updateOrderStatus
+  );
+  
+  router.post(
+    "/customer",
+    authenticateCustomer,
+    validate(createOrderSchema),
+    orderController.createOrder
+  );
+  
+  export const orderRouter = router;
