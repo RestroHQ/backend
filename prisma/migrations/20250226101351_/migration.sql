@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'STAFF');
+CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER');
 
 -- CreateEnum
 CREATE TYPE "RestaurantRole" AS ENUM ('OWNER', 'MANAGER', 'CASHIER', 'WAITER', 'CHEF');
@@ -17,6 +17,9 @@ CREATE TYPE "OrderType" AS ENUM ('DINE_IN', 'TAKEAWAY', 'DELIVERY');
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'PREPARING', 'READY', 'COMPLETED', 'CANCELLED');
 
 -- CreateEnum
+CREATE TYPE "CreatedByType" AS ENUM ('CUSTOMER', 'STAFF');
+
+-- CreateEnum
 CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'FAILED', 'REFUNDED', 'PARTIALLY_REFUNDED');
 
 -- CreateEnum
@@ -24,6 +27,27 @@ CREATE TYPE "PaymentMethod" AS ENUM ('CASH', 'CREDIT_CARD', 'DEBIT_CARD', 'DIGIT
 
 -- CreateEnum
 CREATE TYPE "ReviewStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "PaymentType" AS ENUM ('CASH', 'CARD', 'DIGITAL_WALLET', 'GIFT_CARD', 'SPLIT');
+
+-- CreateEnum
+CREATE TYPE "OrderChannel" AS ENUM ('POS', 'MOBILE', 'WEB');
+
+-- CreateEnum
+CREATE TYPE "CashRegisterStatus" AS ENUM ('OPEN', 'CLOSED', 'SUSPENDED');
+
+-- CreateEnum
+CREATE TYPE "CashRegisterEntryType" AS ENUM ('OPENING_BALANCE', 'CASH_IN', 'CASH_OUT', 'CLOSING_BALANCE');
+
+-- CreateEnum
+CREATE TYPE "SubscriptionPlanStatus" AS ENUM ('ACTIVE', 'INACTIVE');
+
+-- CreateEnum
+CREATE TYPE "SubscriptionTier" AS ENUM ('STARTER', 'PREMIUM', 'ENTERPRISE');
+
+-- CreateEnum
+CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'PAST_DUE', 'CANCELLED', 'EXPIRED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -35,7 +59,7 @@ CREATE TABLE "User" (
     "passwordResetToken" TEXT,
     "passwordResetExpires" TIMESTAMP(3),
     "phone" VARCHAR(20),
-    "role" "Role" NOT NULL DEFAULT 'STAFF',
+    "role" "Role" NOT NULL DEFAULT 'USER',
     "image" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "deletedAt" TIMESTAMP(3),
@@ -74,10 +98,20 @@ CREATE TABLE "Restaurant" (
     "phone" VARCHAR(20),
     "email" TEXT,
     "address" TEXT,
-    "image" TEXT,
+    "website" TEXT,
+    "logo" TEXT,
+    "coverImage" TEXT,
+    "cuisineType" TEXT NOT NULL,
+    "openingTime" TEXT NOT NULL,
+    "closingTime" TEXT NOT NULL,
+    "openDays" TEXT[],
+    "taxNumber" TEXT,
+    "capacity" INTEGER,
+    "isDeliveryEnabled" BOOLEAN NOT NULL DEFAULT false,
     "status" "RestaurantStatus" NOT NULL DEFAULT 'ACTIVE',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "ownerId" TEXT NOT NULL,
+    "storageUsed" INTEGER NOT NULL DEFAULT 0,
     "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -100,7 +134,8 @@ CREATE TABLE "RestaurantStaff" (
 CREATE TABLE "Order" (
     "id" TEXT NOT NULL,
     "restaurantId" TEXT NOT NULL,
-    "customerId" TEXT NOT NULL,
+    "createdById" TEXT NOT NULL,
+    "createdByType" "CreatedByType" NOT NULL,
     "tableId" TEXT,
     "orderType" "OrderType" NOT NULL DEFAULT 'DINE_IN',
     "deliveryAddress" TEXT,
@@ -111,6 +146,14 @@ CREATE TABLE "Order" (
     "total" DECIMAL(10,2) NOT NULL,
     "status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
     "notes" TEXT,
+    "orderChannel" "OrderChannel" DEFAULT 'POS',
+    "sessionId" TEXT,
+    "amountPaid" DECIMAL(10,2),
+    "changeAmount" DECIMAL(10,2),
+    "isVoided" BOOLEAN NOT NULL DEFAULT false,
+    "voidReason" TEXT,
+    "voidedAt" TIMESTAMP(3),
+    "voidedBy" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -140,6 +183,15 @@ CREATE TABLE "OrderPayment" (
     "amount" DECIMAL(10,2) NOT NULL,
     "paymentMethod" "PaymentMethod" NOT NULL,
     "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
+    "paymentType" "PaymentType",
+    "cardLast4" TEXT,
+    "cardType" TEXT,
+    "transactionId" TEXT,
+    "receiptNumber" TEXT,
+    "refundedAmount" DECIMAL(10,2),
+    "refundReason" TEXT,
+    "refundedAt" TIMESTAMP(3),
+    "refundedBy" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -212,6 +264,7 @@ CREATE TABLE "Menu" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "Menu_pkey" PRIMARY KEY ("id")
 );
@@ -257,6 +310,41 @@ CREATE TABLE "EmailsList" (
     CONSTRAINT "EmailsList_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "SubscriptionPlan" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "tier" "SubscriptionTier" NOT NULL,
+    "status" "SubscriptionPlanStatus" NOT NULL DEFAULT 'ACTIVE',
+    "stripe_price_id" TEXT NOT NULL,
+    "stripeProductId" TEXT NOT NULL,
+    "price" DECIMAL(10,2) NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'usd',
+    "interval" TEXT NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SubscriptionPlan_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Subscription" (
+    "id" TEXT NOT NULL,
+    "restaurantId" TEXT NOT NULL,
+    "planId" TEXT NOT NULL,
+    "stripe_customer_id" TEXT,
+    "stripe_subscription_id" TEXT,
+    "status" "SubscriptionStatus" NOT NULL DEFAULT 'ACTIVE',
+    "startDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "stripe_current_period_end" TIMESTAMP(3) NOT NULL,
+    "cancelledAt" TIMESTAMP(3),
+    "lastBillingDate" TIMESTAMP(3),
+    "nextBillingDate" TIMESTAMP(3),
+
+    CONSTRAINT "Subscription_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -300,10 +388,13 @@ CREATE INDEX "RestaurantStaff_restaurantId_role_idx" ON "RestaurantStaff"("resta
 CREATE UNIQUE INDEX "RestaurantStaff_restaurantId_userId_key" ON "RestaurantStaff"("restaurantId", "userId");
 
 -- CreateIndex
-CREATE INDEX "Order_restaurantId_status_createdAt_idx" ON "Order"("restaurantId", "status", "createdAt");
+CREATE INDEX "Order_createdById_idx" ON "Order"("createdById");
 
 -- CreateIndex
-CREATE INDEX "Order_customerId_createdAt_idx" ON "Order"("customerId", "createdAt");
+CREATE INDEX "Order_sessionId_idx" ON "Order"("sessionId");
+
+-- CreateIndex
+CREATE INDEX "Order_restaurantId_status_createdAt_idx" ON "Order"("restaurantId", "status", "createdAt");
 
 -- CreateIndex
 CREATE INDEX "Order_tableId_idx" ON "Order"("tableId");
@@ -316,6 +407,12 @@ CREATE INDEX "OrderItem_menuItemId_idx" ON "OrderItem"("menuItemId");
 
 -- CreateIndex
 CREATE INDEX "OrderPayment_orderId_status_idx" ON "OrderPayment"("orderId", "status");
+
+-- CreateIndex
+CREATE INDEX "OrderPayment_transactionId_idx" ON "OrderPayment"("transactionId");
+
+-- CreateIndex
+CREATE INDEX "OrderPayment_receiptNumber_idx" ON "OrderPayment"("receiptNumber");
 
 -- CreateIndex
 CREATE INDEX "Table_restaurantId_isAvailable_idx" ON "Table"("restaurantId", "isAvailable");
@@ -359,6 +456,30 @@ CREATE UNIQUE INDEX "EmailsList_email_key" ON "EmailsList"("email");
 -- CreateIndex
 CREATE INDEX "EmailsList_email_isActive_idx" ON "EmailsList"("email", "isActive");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "SubscriptionPlan_name_key" ON "SubscriptionPlan"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SubscriptionPlan_stripe_price_id_key" ON "SubscriptionPlan"("stripe_price_id");
+
+-- CreateIndex
+CREATE INDEX "SubscriptionPlan_tier_isActive_idx" ON "SubscriptionPlan"("tier", "isActive");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Subscription_restaurantId_key" ON "Subscription"("restaurantId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Subscription_stripe_customer_id_key" ON "Subscription"("stripe_customer_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Subscription_stripe_subscription_id_key" ON "Subscription"("stripe_subscription_id");
+
+-- CreateIndex
+CREATE INDEX "Subscription_restaurantId_idx" ON "Subscription"("restaurantId");
+
+-- CreateIndex
+CREATE INDEX "Subscription_planId_idx" ON "Subscription"("planId");
+
 -- AddForeignKey
 ALTER TABLE "Customer" ADD CONSTRAINT "Customer_restaurantId_fkey" FOREIGN KEY ("restaurantId") REFERENCES "Restaurant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -378,7 +499,10 @@ ALTER TABLE "Order" ADD CONSTRAINT "Order_restaurantId_fkey" FOREIGN KEY ("resta
 ALTER TABLE "Order" ADD CONSTRAINT "Order_tableId_fkey" FOREIGN KEY ("tableId") REFERENCES "Table"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Order" ADD CONSTRAINT "Order_createdByStaff_fkey" FOREIGN KEY ("createdById") REFERENCES "RestaurantStaff"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Order" ADD CONSTRAINT "Order_createdByCustomer_fkey" FOREIGN KEY ("createdById") REFERENCES "Customer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -430,3 +554,9 @@ ALTER TABLE "Review" ADD CONSTRAINT "Review_customerId_fkey" FOREIGN KEY ("custo
 
 -- AddForeignKey
 ALTER TABLE "EmailsList" ADD CONSTRAINT "EmailsList_restaurantId_fkey" FOREIGN KEY ("restaurantId") REFERENCES "Restaurant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_restaurantId_fkey" FOREIGN KEY ("restaurantId") REFERENCES "Restaurant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_planId_fkey" FOREIGN KEY ("planId") REFERENCES "SubscriptionPlan"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

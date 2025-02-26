@@ -1,36 +1,37 @@
 import express from "express";
-import { authenticate, authorize } from "../middlewares/auth.middleware";
+import * as restaurantController from "../controllers/restaurant.controller";
+import {
+  authenticateStaff,
+  authorize,
+  authorizeRestaurantRole,
+} from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createRestaurantSchema,
-  updateRestaurantSchema,
-  addStaffSchema,
   paginationSchema,
+  updateRestaurantSchema,
 } from "../schemas/restaurant.schema";
-import * as restaurantController from "../controllers/restaurant.controller";
-import { customerRouter } from "./cutomer.routes";
-import { menuRouter } from "./menu.routes";
-import { reservationRouter } from "./reservation.routes";
-import { reviewRouter } from "./review.routes";
-import { tableRouter } from "./table.routes";
+import { staffRouter } from "./staff.routes";
+import { subscriptionRouter } from "./subscription.routes";
+import { usageRouter } from "./usage.router";
 
 const router = express.Router();
 
 router.get(
   "/",
-  authenticate,
+  authenticateStaff,
+  authorize(["ADMIN"]),
   validate(paginationSchema),
   restaurantController.getRestaurants
 );
-router.get(
-  "/:restaurantId",
-  authenticate,
-  restaurantController.getRestaurantById
-);
+
+router.get("/me", authenticateStaff, restaurantController.getUserRestaurants);
+
+router.get("/:restaurantId", restaurantController.getRestaurantById);
 
 router.post(
   "/",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
   validate(createRestaurantSchema),
   restaurantController.createRestaurant
@@ -38,46 +39,23 @@ router.post(
 
 router.patch(
   "/:restaurantId",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
+  authorizeRestaurantRole(["OWNER"]),
   validate(updateRestaurantSchema),
   restaurantController.updateRestaurant
 );
 
 router.delete(
   "/:restaurantId",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
+  authorizeRestaurantRole(["OWNER"]),
   restaurantController.deleteRestaurant
 );
 
-router.get(
-  "/:restaurantId/staff",
-  authenticate,
-  authorize(["USER"]),
-  validate(paginationSchema),
-  restaurantController.getRestaurantStaff
-);
-
-router.post(
-  "/:restaurantId/staff",
-  authenticate,
-  authorize(["USER"]),
-  validate(addStaffSchema),
-  restaurantController.addRestaurantStaff
-);
-
-router.delete(
-  "/:restaurantId/staff/:userId",
-  authenticate,
-  authorize(["USER"]),
-  restaurantController.removeRestaurantStaff
-);
-
-router.use("/:restaurantId/customers", customerRouter);
-router.use("/:restaurantId/menus", menuRouter);
-router.use("/:restaurantId/reservations", reservationRouter);
-router.use("/:restaurantId/reviews", reviewRouter);
-router.use("/:restaurantId/tables", tableRouter);
+router.use("/:restaurantId/usage", usageRouter);
+router.use("/:restaurantId/staff", staffRouter);
+router.use("/:restaurantId/subscription", subscriptionRouter);
 
 export const restaurantRouter = router;

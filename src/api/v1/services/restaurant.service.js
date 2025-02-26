@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { generateDownloadUrl } from "./s3.service";
+import { config } from "@/lib/config";
+
+const { EXPIRY_IN_SECONDS } = config;
 
 export const createRestaurant = async (data, ownerId) => {
   const existingRestaurant = await prisma.restaurant.findFirst({
@@ -82,30 +85,17 @@ export const deleteRestaurant = async (id, userId) => {
   return { message: "Restaurant deleted successfully" };
 };
 
-export const getRestaurantById = async (id) => {
+export const getRestaurantById = async (id, userId) => {
   const restaurant = await prisma.restaurant.findUnique({
     where: {
       id,
       deletedAt: null,
     },
     include: {
-      owner: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
       staff: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
+        select: {
+          userId: true,
+          role: true,
         },
       },
     },
@@ -115,14 +105,30 @@ export const getRestaurantById = async (id) => {
     throw new Error("Restaurant not found");
   }
 
+  if (userId) {
+    const isOwner = restaurant.ownerId === userId;
+    const isManager = restaurant.staff.some(
+      (staff) => staff.userId === userId && staff.role === "MANAGER"
+    );
+
+    if (!isOwner && !isManager) {
+      restaurant.staff = restaurant.staff.filter(
+        (staff) => staff.userId === userId
+      );
+    }
+  }
+
   if (restaurant.logo) {
-    restaurant.logo = await generateDownloadUrl(restaurant.logo, 604800);
+    restaurant.logo = await generateDownloadUrl(
+      restaurant.logo,
+      EXPIRY_IN_SECONDS
+    );
   }
 
   if (restaurant.coverImage) {
     restaurant.coverImage = await generateDownloadUrl(
       restaurant.coverImage,
-      604800
+      EXPIRY_IN_SECONDS
     );
   }
 
@@ -190,13 +196,16 @@ export const getRestaurants = async (
 
     restaurants.forEach(async (restaurant) => {
       if (restaurant.logo) {
-        restaurant.logo = await generateDownloadUrl(restaurant.logo, 604800);
+        restaurant.logo = await generateDownloadUrl(
+          restaurant.logo,
+          EXPIRY_IN_SECONDS
+        );
       }
 
       if (restaurant.coverImage) {
         restaurant.coverImage = await generateDownloadUrl(
           restaurant.coverImage,
-          604800
+          EXPIRY_IN_SECONDS
         );
       }
     });
@@ -215,138 +224,36 @@ export const getRestaurants = async (
   }
 };
 
-export const addRestaurantStaff = async (restaurantId, data, userId) => {
-  const restaurant = await prisma.restaurant.findUnique({
-    where: { id: restaurantId },
-    include: {
-      staff: true,
-    },
-  });
-
-  if (!restaurant) {
-    throw new Error("Restaurant not found");
-  }
-
-  const isOwner = restaurant.ownerId === userId;
-  const isAdmin = restaurant.staff.some(
-    (staff) => staff.userId === userId && staff.user.role === "ADMIN"
-  );
-
-  if (!isOwner && !isAdmin) {
-    throw new Error("Unauthorized to add staff");
-  }
-
-  const existingStaff = restaurant.staff.find(
-    (staff) => staff.userId === data.userId
-  );
-
-  if (existingStaff) {
-    throw new Error("User is already a staff member");
-  }
-
-  const staffMember = await prisma.restaurantStaff.create({
-    data: {
-      restaurantId,
-      userId: data.userId,
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-        },
-      },
-    },
-  });
-
-  return staffMember;
-};
-
-export const removeRestaurantStaff = async (
-  restaurantId,
-  staffUserId,
-  requestingUserId
+export const getUserRestaurants = async (
+  user,
+  { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = {}
 ) => {
-  const restaurant = await prisma.restaurant.findUnique({
-    where: { id: restaurantId },
-    include: {
-      staff: true,
-    },
-  });
+  try {
+    const offset = (page - 1) * limit;
 
-  if (!restaurant) {
-    throw new Error("Restaurant not found");
-  }
-
-  const isOwner = restaurant.ownerId === requestingUserId;
-  const isAdmin = restaurant.staff.some(
-    (staff) => staff.userId === requestingUserId && staff.user.role === "ADMIN"
-  );
-
-  if (!isOwner && !isAdmin) {
-    throw new Error("Unauthorized to remove staff");
-  }
-
-  await prisma.restaurantStaff.deleteMany({
-    where: {
-      restaurantId,
-      userId: staffUserId,
-    },
-  });
-
-  return { message: "Staff member removed successfully" };
-};
-
-export const getRestaurantStaff = async (
-  restaurantId,
-  userId,
-  { page = 1, limit = 10, sortBy = "joinedAt", sortOrder = "desc" } = {}
-) => {
-  const restaurant = await prisma.restaurant.findUnique({
-    where: { id: restaurantId },
-    include: {
-      staff: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
-        },
+    const total = await prisma.restaurant.count({
+      where: {
+        ownerId: user.id,
+        deletedAt: null,
       },
-    },
-  });
+    });
 
-  if (!restaurant) {
-    throw new Error("Restaurant not found");
-  }
-
-  const isOwner = restaurant.ownerId === userId;
-  const isAdmin = restaurant.staff.some(
-    (staff) => staff.userId === userId && staff.user.role === "ADMIN"
-  );
-
-  if (!isOwner && !isAdmin) {
-    throw new Error("Unauthorized to view staff");
-  }
-
-  const offset = (page - 1) * limit;
-
-  const [staff, total] = await Promise.all([
-    prisma.restaurantStaff.findMany({
-      where: { restaurantId },
+    const restaurants = await prisma.restaurant.findMany({
+      where: {
+        ownerId: user.id,
+        deletedAt: null,
+      },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
+        staff: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
+            },
           },
         },
       },
@@ -355,17 +262,34 @@ export const getRestaurantStaff = async (
       },
       skip: offset,
       take: limit,
-    }),
-    prisma.restaurantStaff.count({ where: { restaurantId } }),
-  ]);
+    });
 
-  return {
-    staff,
-    pagination: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+    restaurants.forEach(async (restaurant) => {
+      if (restaurant.logo) {
+        restaurant.logo = await generateDownloadUrl(
+          restaurant.logo,
+          EXPIRY_IN_SECONDS
+        );
+      }
+
+      if (restaurant.coverImage) {
+        restaurant.coverImage = await generateDownloadUrl(
+          restaurant.coverImage,
+          EXPIRY_IN_SECONDS
+        );
+      }
+    });
+
+    return {
+      restaurants,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  } catch (error) {
+    throw new Error(`Failed to fetch restaurants: ${error.message}`);
+  }
 };
