@@ -1,3 +1,4 @@
+import { logger } from "@/index";
 import { config } from "./config";
 import { fromError } from "zod-validation-error";
 
@@ -29,7 +30,7 @@ export const errorHandler = (error, res, code = 400) => {
   }
 
   if (config.NODE_ENV === "development") {
-    console.error(error);
+    logger.error(error);
   }
   return res.status(parseInt(code)).json({ error: { type, messages } });
 };

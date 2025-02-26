@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authRouter } from "./routes/auth.routes";
 import { fileRouter } from "./routes/file.routes";
+import { planRouter } from "./routes/plan.routes";
 import { restaurantRouter } from "./routes/restaurant.routes";
 import { userRouter } from "./routes/user.routes";
 
@@ -18,6 +19,7 @@ router.use("/auth", authRouter);
 router.use("/users", userRouter);
 router.use("/restaurants", restaurantRouter);
 router.use("/files", fileRouter);
+router.use("/plans", planRouter);
 
 // NOTE: Moved other routes to the `restaurant.routes.js` file
 
