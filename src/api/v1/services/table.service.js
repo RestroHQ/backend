@@ -1,76 +1,82 @@
 import { prisma } from "@/lib/prisma";
 
-export const getAllTables = async (restaurantId) => {
-  try {
-    return await prisma.table.findMany({
-      where: { restaurantId },
-    });
-  } catch (error) {
-    throw new Error("Error fetching tables: " + error.message);
-  }
-};
-
 export const createTable = async (restaurantId, data) => {
-  try {
-    if (!data.name || !data.capacity) {
-      throw new Error("Table name and capacity are required.");
-    }
-
-    const existingTable = await prisma.table.findFirst({
-      where: {
-        restaurantId,
-        name: data.name,
-      },
-    });
-
-    if (existingTable) {
-      throw new Error("Table with this name already exists.");
-    }
-
-    return await prisma.table.create({
-      data: {
-        ...data,
-        restaurantId,
-      },
-    });
-  } catch (error) {
-    throw new Error("Error creating table: " + error.message);
-  }
+  return prisma.table.create({
+    data: {
+      ...data,
+      restaurantId,
+    },
+  });
 };
 
-export const updateTable = async (tableId, data) => {
-  try {
-    if (!data.name && !data.capacity) {
-      throw new Error(
-        "You must provide either a name or a capacity to update."
-      );
-    }
+export const updateTable = async (id, data) => {
+  const table = await prisma.table.findUnique({
+    where: { id },
+    include: {
+      reservations: {
+        where: {
+          status: {
+            in: ["PENDING", "CONFIRMED"],
+          },
+        },
+      },
+    },
+  });
 
-    const updatedTable = await prisma.table.update({
-      where: { id: tableId },
-      data,
-    });
-
-    return updatedTable;
-  } catch (error) {
-    throw new Error("Error updating table: " + error.message);
+  if (!table) {
+    throw new Error("Table not found");
   }
+
+  // Check if table can be made unavailable
+  if (data.isAvailable === false && table.reservations.length > 0) {
+    throw new Error(
+      "Cannot make table unavailable - has upcoming reservations"
+    );
+  }
+
+  return prisma.table.update({
+    where: { id },
+    data,
+  });
 };
 
-export const deleteTable = async (tableId) => {
-  try {
-    const table = await prisma.table.findUnique({
-      where: { id: tableId },
-    });
+export const getAvailableTables = async (
+  restaurantId,
+  timeSlotId,
+  guestCount
+) => {
+  const timeSlot = await prisma.timeSlot.findUnique({
+    where: { id: timeSlotId },
+  });
 
-    if (!table) {
-      throw new Error("Table not found.");
-    }
-
-    return await prisma.table.delete({
-      where: { id: tableId },
-    });
-  } catch (error) {
-    throw new Error("Error deleting table: " + error.message);
+  if (!timeSlot) {
+    throw new Error("Time slot not found");
   }
+
+  // Find tables that are available and have sufficient capacity
+  const tables = await prisma.table.findMany({
+    where: {
+      restaurantId,
+      isAvailable: true,
+      capacity: {
+        gte: guestCount,
+      },
+      // Exclude tables that have reservations during this time slot
+      NOT: {
+        reservations: {
+          some: {
+            timeSlotId,
+            status: {
+              in: ["PENDING", "CONFIRMED"],
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      capacity: "asc", // Get smallest suitable table first
+    },
+  });
+
+  return tables;
 };

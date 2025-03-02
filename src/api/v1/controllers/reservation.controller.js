@@ -1,19 +1,21 @@
 import { errorHandler } from "@/lib/error-handler";
 import * as reservationService from "../services/reservation.service";
 
-export const getReservations = async (req, res) => {
-  try {
-    const { restaurantId } = req.params;
-    const reservations = await reservationService.getReservations(restaurantId);
-    res.status(200).json(reservations);
-  } catch (error) {
-    errorHandler(error, res);
-  }
-};
-
 export const createReservation = async (req, res) => {
   try {
-    const reservation = await reservationService.createReservation(req.body);
+    const { id: customerId } = req.customer;
+    const { id: userId } = req.user;
+    const { restaurantId } = req.params;
+
+    const data = {
+      ...req.body,
+      restaurantId,
+    };
+
+    const reservation = await reservationService.createReservation(
+      req.body,
+      req.user.id
+    );
     res.status(201).json(reservation);
   } catch (error) {
     errorHandler(error, res);
@@ -22,64 +24,71 @@ export const createReservation = async (req, res) => {
 
 export const updateReservation = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { reservationId } = req.params;
+    const { id: userId } = req.user;
+
     const reservation = await reservationService.updateReservation(
-      id,
-      req.body
+      reservationId,
+      req.body,
+      userId
     );
-    res.status(200).json(reservation);
+    res.json(reservation);
   } catch (error) {
     errorHandler(error, res);
   }
 };
 
-export const deleteReservation = async (req, res) => {
+export const getReservationById = async (req, res) => {
   try {
-    const { id } = req.params;
-    await reservationService.deleteReservation(id);
-    res.status(204).send();
-  } catch (error) {
-    errorHandler(error, res);
-  }
-};
+    const { reservationId } = req.params;
+    const { id: userId } = req.user;
 
-export const checkAvailability = async (req, res) => {
-  try {
-    const { restaurantId } = req.params;
-    const { date, guests } = req.query;
-    const availability = await reservationService.checkAvailability(
-      restaurantId,
-      date,
-      guests
+    const reservation = await reservationService.getReservationById(
+      reservationId,
+      userId
     );
-    res.status(200).json(availability);
+    res.json(reservation);
   } catch (error) {
     errorHandler(error, res);
   }
 };
 
-export const getCapacity = async (req, res) => {
+export const getCustomerReservations = async (req, res) => {
   try {
-    const { restaurantId } = req.params;
-    const capacity = await reservationService.calculateCapacity(restaurantId);
-    res.status(200).json(capacity);
+    const { page, limit, sortBy, sortOrder } = req.query;
+    const { id: customerId } = req.customer;
+
+    const result = await reservationService.getCustomerReservations(
+      customerId,
+      {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sortBy,
+        sortOrder,
+      }
+    );
+    res.json(result);
   } catch (error) {
     errorHandler(error, res);
   }
 };
 
-export const manageWaitlist = async (req, res) => {
+export const getRestaurantReservations = async (req, res) => {
   try {
+    const { page, limit, sortBy, sortOrder, status } = req.query;
     const { restaurantId } = req.params;
-    const { date, guests, userId, timeSlotId } = req.body;
-    const waitlistEntry = await reservationService.manageWaitlist({
+
+    const result = await reservationService.getRestaurantReservations(
       restaurantId,
-      date,
-      guests,
-      userId,
-      timeSlotId,
-    });
-    res.status(201).json(waitlistEntry);
+      {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sortBy,
+        sortOrder,
+        status,
+      }
+    );
+    res.json(result);
   } catch (error) {
     errorHandler(error, res);
   }

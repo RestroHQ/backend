@@ -1,33 +1,20 @@
 import { z } from "zod";
 
 export const createReservationSchema = z.object({
-  restaurantId: z.string().min(1, "Restaurant ID is required"),
-  userId: z.string().min(1, "User ID is required"),
-  date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
-  time: z
-    .string()
-    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
-  guests: z.number().positive("Guests must be a positive number"),
+  tableId: z.string().cuid(),
+  timeSlotId: z.string().cuid(),
+  guestCount: z.number().int().min(1),
+  notes: z.string().optional(),
 });
 
-export const updateReservationSchema = createReservationSchema.partial();
-
-export const manageWaitlistSchema = z.object({
-  restaurantId: z.string().min(1, "Restaurant ID is required"),
-  date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
-  guests: z.number().positive("Guests must be a positive number"),
-  userId: z.string().min(1, "User ID is required"),
-  timeSlotId: z.string().optional(),
+export const updateReservationSchema = z.object({
+  status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]),
+  notes: z.string().optional(),
 });
 
-export const checkAvailabilitySchema = z.object({
-  restaurantId: z.string().min(1, "Restaurant ID is required"),
-  date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
-  guests: z.number().positive("Guests must be a positive number"),
+export const paginationSchema = z.object({
+  page: z.string().optional().transform(Number).default("1"),
+  limit: z.string().optional().transform(Number).default("10"),
+  sortBy: z.string().optional().default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
