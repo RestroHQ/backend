@@ -1,173 +1,229 @@
 import { prisma } from "@/lib/prisma";
 
-export const createReservation = async (data) => {
-  try {
-    if (
-      !data.restaurantId ||
-      !data.tableId ||
-      !data.userId ||
-      !data.timeSlotId ||
-      !data.guestCount
-    ) {
-      throw new Error(
-        "Missing required reservation fields: restaurantId, tableId, userId, timeSlotId, and guestCount."
-      );
-    }
+export const createReservation = async (data, customerId, restaurantId) => {
+  const timeSlot = await prisma.timeSlot.findFirst({
+    where: {
+      id: data.timeSlotId,
+      restaurantId,
+      isAvailable: true,
+    },
+  });
 
-    const table = await prisma.table.findUnique({
-      where: { id: data.tableId },
-      include: { reservations: true },
-    });
-
-    if (!table) {
-      throw new Error("Table not found.");
-    }
-
-    const conflictingReservations = table.reservations.filter((reservation) => {
-      return (
-        reservation.timeSlotId === data.timeSlotId &&
-        reservation.status !== "CANCELLED"
-      );
-    });
-
-    if (conflictingReservations.length > 0) {
-      throw new Error(
-        "The selected table is already booked for this time slot."
-      );
-    }
-
-    return await prisma.reservation.create({
-      data,
-    });
-  } catch (error) {
-    throw new Error("Error creating reservation: " + error.message);
+  if (!timeSlot) {
+    throw new Error("Time slot is not available");
   }
-};
 
-export const getReservations = async (restaurantId) => {
-  try {
-    return await prisma.reservation.findMany({
-      where: { restaurantId },
-      include: { table: true, user: true },
-    });
-  } catch (error) {
-    throw new Error("Error fetching reservations: " + error.message);
+  const table = await prisma.table.findFirst({
+    where: {
+      id: data.tableId,
+      restaurantId,
+      isAvailable: true,
+      capacity: {
+        gte: data.guestCount,
+      },
+    },
+  });
+
+  if (!table) {
+    throw new Error("Table is not available or insufficient capacity");
   }
-};
 
-export const updateReservation = async (reservationId, data) => {
-  try {
-    // Check if the reservation exists
-    const reservation = await prisma.reservation.findUnique({
-      where: { id: reservationId },
-    });
+  // Check if customer belongs to the restaurant
+  const customer = await prisma.customer.findFirst({
+    where: {
+      id: customerId,
+      restaurantId,
+      isActive: true,
+    },
+  });
 
-    if (!reservation) {
-      throw new Error("Reservation not found.");
-    }
+  if (!customer) {
+    throw new Error("Customer not found or unauthorized");
+  }
 
-    if (data.timeSlotId) {
-      const conflictingReservations = await prisma.reservation.findMany({
-        where: {
-          tableId: reservation.tableId,
-          timeSlotId: data.timeSlotId,
-          status: { not: "CANCELLED" },
+  const reservation = await prisma.reservation.create({
+    data: {
+      ...data,
+      customerId,
+      restaurantId,
+      status: "PENDING",
+    },
+    include: {
+      table: true,
+      timeSlot: true,
+      customer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
         },
-      });
+      },
+    },
+  });
 
-      if (conflictingReservations.length > 0) {
-        throw new Error("The selected time slot is already booked.");
-      }
-    }
-
-    return await prisma.reservation.update({
-      where: { id: reservationId },
-      data,
-    });
-  } catch (error) {
-    throw new Error("Error updating reservation: " + error.message);
-  }
+  return reservation;
 };
 
-export const deleteReservation = async (reservationId) => {
-  try {
-    const reservation = await prisma.reservation.findUnique({
-      where: { id: reservationId },
-    });
+export const updateReservation = async (id, data, customerId) => {
+  const reservation = await prisma.reservation.findUnique({
+    where: { id },
+    include: { customer: true },
+  });
 
-    if (!reservation) {
-      throw new Error("Reservation not found.");
-    }
-
-    return await prisma.reservation.delete({
-      where: { id: reservationId },
-    });
-  } catch (error) {
-    throw new Error("Error deleting reservation: " + error.message);
+  if (!reservation) {
+    throw new Error("Reservation not found");
   }
+
+  if (reservation.customerId !== customerId) {
+    throw new Error("Unauthorized to update this reservation");
+  }
+
+  const updatedReservation = await prisma.reservation.update({
+    where: { id },
+    data,
+    include: {
+      table: true,
+      timeSlot: true,
+      customer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+    },
+  });
+
+  return updatedReservation;
 };
 
-export const checkAvailability = async (restaurantId, date, guests) => {
+export const getReservationById = async (id, customerId) => {
+  const reservation = await prisma.reservation.findUnique({
+    where: { id },
+    include: {
+      table: true,
+      timeSlot: true,
+      customer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+    },
+  });
+
+  if (!reservation) {
+    throw new Error("Reservation not found");
+  }
+
+  if (reservation.customerId !== customerId) {
+    throw new Error("Unauthorized to view this reservation");
+  }
+
+  return reservation;
+};
+
+export const getCustomerReservations = async (
+  customerId,
+  { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = {}
+) => {
+  const offset = (page - 1) * limit;
+
   try {
-    const availableTables = await prisma.table.findMany({
-      where: {
-        restaurantId,
-        capacity: { gte: guests },
-        reservations: {
-          none: {
-            timeSlot: {
-              startTime: { lte: new Date(date) },
-              endTime: { gte: new Date(date) },
-            },
-            status: { not: "CANCELLED" },
+    const reservations = await prisma.reservation.findMany({
+      where: { customerId },
+      include: {
+        table: true,
+        timeSlot: true,
+        restaurant: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
           },
         },
       },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip: offset,
+      take: limit,
     });
 
-    return availableTables.length > 0;
+    const total = await prisma.reservation.count({ where: { customerId } });
+
+    return {
+      reservations,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   } catch (error) {
-    throw new Error("Error checking availability: " + error.message);
+    throw new Error(`Failed to get customer reservations: ${error.message}`);
   }
 };
 
-export const calculateCapacity = async (restaurantId) => {
-  try {
-    const tables = await prisma.table.findMany({
-      where: { restaurantId },
-      select: { capacity: true },
-    });
+export const getRestaurantReservations = async (
+  restaurantId,
+  {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+    status,
+  } = {}
+) => {
+  const pageInt = parseInt(page);
+  const limitInt = parseInt(limit);
+  const offset = (pageInt - 1) * limitInt;
 
-    return tables.reduce((sum, table) => sum + table.capacity, 0);
-  } catch (error) {
-    throw new Error("Error calculating capacity: " + error.message);
+  const where = { restaurantId };
+
+  if (status) {
+    where.status = status;
   }
-};
 
-export const manageWaitlist = async (data) => {
   try {
-    const tableAvailable = await checkAvailability(
-      data.restaurantId,
-      data.date,
-      data.guestCount
-    );
-
-    if (tableAvailable) {
-      return await createReservation(data);
-    } else {
-      const waitlistEntry = await prisma.waitlist.create({
-        data: {
-          restaurantId: data.restaurantId,
-          userId: data.userId,
-          timeSlotId: data.timeSlotId,
-          guestCount: data.guestCount,
-          rank: 0,
+    const reservations = await prisma.reservation.findMany({
+      where,
+      include: {
+        table: true,
+        timeSlot: true,
+        customer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
         },
-      });
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip: offset,
+      take: limitInt, // Add the take parameter with the converted limit value
+    });
 
-      return waitlistEntry;
-    }
+    const total = await prisma.reservation.count({ where });
+
+    return {
+      reservations,
+      pagination: {
+        total,
+        page: pageInt,
+        limit: limitInt,
+        totalPages: Math.ceil(total / limitInt),
+      },
+    };
   } catch (error) {
-    throw new Error("Error managing waitlist: " + error.message);
+    throw new Error(`Failed to get restaurant reservations: ${error.message}`);
   }
 };
