@@ -21,3 +21,27 @@ router.get(
   validate(orderQuerySchema),
   orderController.getOrders
 );
+router.post(
+    "/",
+    authenticateStaff,
+    authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
+    validate(createOrderSchema),
+    orderController.createOrder
+  );
+  
+  router.patch(
+    "/:orderId/status",
+    authenticateStaff,
+    authorizeRestaurantRole(["OWNER", "MANAGER", "CHEF"]),
+    validate(updateOrderStatusSchema),
+    orderController.updateOrderStatus
+  );
+  
+  router.post(
+    "/customer",
+    authenticateCustomer,
+    validate(createOrderSchema),
+    orderController.createOrder
+  );
+  
+  export const orderRouter = router;
