@@ -35,3 +35,17 @@ export const updateOrderStatus = async (req, res) => {
       errorHandler(error, res);
     }
   };
+
+
+export const getOrders = async (req, res) => {
+    try {
+      const { restaurantId } = req.params;
+  
+      const orders = await orderService.getOrders(restaurantId, req.query);
+  
+      res.json(orders);
+    } catch (error) {
+      errorHandler(error, res);
+    }
+  };
+  
