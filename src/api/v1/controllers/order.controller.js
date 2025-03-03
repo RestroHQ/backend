@@ -17,3 +17,21 @@ export const createOrder = async (req, res) => {
     errorHandler(error, res);
   }
 };
+
+
+export const updateOrderStatus = async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const { status } = req.body;
+  
+      const order = await orderService.updateOrderStatus(
+        orderId,
+        status,
+        req.user
+      );
+  
+      res.json(order);
+    } catch (error) {
+      errorHandler(error, res);
+    }
+  };
