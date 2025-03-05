@@ -36,3 +36,11 @@ router.post(
   checkResourceLimit("menus"),
   menuController.createMenu
 );
+
+router.patch(
+    "/:menuId",
+    authenticateStaff,
+    validate(updateMenuSchema),
+    authorizeRestaurantRole(["OWNER", "MANAGER"]),
+    menuController.updateMenu
+  );
