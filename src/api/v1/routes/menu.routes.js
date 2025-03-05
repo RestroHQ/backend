@@ -44,3 +44,10 @@ router.patch(
     authorizeRestaurantRole(["OWNER", "MANAGER"]),
     menuController.updateMenu
   );
+
+  router.delete(
+    "/:menuId",
+    authenticateStaff,
+    authorizeRestaurantRole(["OWNER", "MANAGER"]),
+    menuController.deleteMenu
+  );
