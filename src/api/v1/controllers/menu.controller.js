@@ -1,13 +1,14 @@
-const menuService = require("../services/menu.service");
+import { errorHandler } from "@/lib/error-handler";
+import * as menuService from "../services/menu.service";
 
-// Controller for creating a menu category
-const createMenuCategory = async (req, res, next) => {
+export const getAllMenus = async (req, res) => {
   try {
-    const data = req.body;
-    const category = await menuService.createMenuCategory(data);
-    res.status(201).json(category);
+    const { restaurantId } = req.params;
+
+    const menus = await menuService.getAllMenus(restaurantId);
+    res.json(menus);
   } catch (error) {
-    next(error);
+    errorHandler(error, res);
   }
 };
 
