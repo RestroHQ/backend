@@ -23,16 +23,19 @@ export const getMenuById = async (req, res) => {
   }
 };
 
-// Controller for creating a menu item
-const createMenuItem = async (req, res, next) => {
+export const createMenu = async (req, res) => {
   try {
-    const data = req.body;
-    const item = await menuService.createMenuItem(data);
-    res.status(201).json(item);
+    const { restaurantId } = req.params;
+    const data = { ...req.body, restaurantId };
+
+    const menu = await menuService.createMenu(data);
+
+    res.status(201).json(menu);
   } catch (error) {
-    next(error);
+    errorHandler(error, res);
   }
 };
+
 
 // Controller for fetching menu items by category
 const getMenuItemsByCategory = async (req, res, next) => {
