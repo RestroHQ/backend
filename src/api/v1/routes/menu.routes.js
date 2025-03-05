@@ -68,3 +68,12 @@ router.patch(
     menuController.updateMenuItem
   );
   
+  router.delete(
+    "/:menuId/items/:itemId",
+    authenticateStaff,
+    authorizeRestaurantRole(["OWNER", "MANAGER"]),
+    menuController.deleteMenuItem
+  );
+  
+  export const menuRouter = router;
+  
