@@ -140,3 +140,16 @@ export const createMenuItem = async (data) => {
 
   return menuItem;
 };
+
+export const updateMenuItem = async (id, data) => {
+  const menuItem = await prisma.menuItem.update({
+    where: { id },
+    data,
+  });
+
+  if (menuItem.imageUrl) {
+    menuItem.imageUrl = await generateDownloadUrl(menuItem.imageUrl);
+  }
+
+  return menuItem;
+};
