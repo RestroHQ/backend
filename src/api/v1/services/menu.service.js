@@ -153,3 +153,10 @@ export const updateMenuItem = async (id, data) => {
 
   return menuItem;
 };
+
+export const deleteMenuItem = async (id) => {
+  await prisma.menuItem.delete({
+    where: { id },
+  });
+  return { message: "Menu item deleted successfully" };
+};
