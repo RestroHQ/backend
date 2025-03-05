@@ -1,23 +1,26 @@
-import express from "express";
+import { Router } from "express";
+import * as menuController from "../controllers/menu.controller";
+import {
+  authenticateStaff,
+  authorizeRestaurantRole,
+} from "../middlewares/auth.middleware";
+import { validate } from "../middlewares/validate.middleware";
+import {
+  createMenuItemSchema,
+  createMenuSchema,
+  updateMenuItemSchema,
+  updateMenuSchema,
+} from "../schemas/menu.schema";
+import {
+  checkResourceLimit,
+  validateSubscription,
+} from "../middlewares/subscription.middleware";
 
-const router = express.Router({ mergeParams: true });
+const router = Router({ mergeParams: true });
 
-// const express = require("express");
-// const menuController = require("../controllers/menu.controller");
-
-// const router = express.Router();
-
-// router.post("/menu-categories", menuController.createMenuCategory);
-// router.get(
-//   "/restaurants/:restaurantId/menu-categories",
-//   menuController.getMenuCategoriesByRestaurant
-// );
-// router.post("/menu-items", menuController.createMenuItem);
-// router.get(
-//   "/menu-categories/:categoryId/menu-items",
-//   menuController.getMenuItemsByCategory
-// );
-
-// module.exports = router;
-
-export const menuRouter = router;
+router.get(
+  "/",
+  authenticateStaff,
+  authorizeRestaurantRole(["OWNER", "MANAGER", "CASHIER", "WAITER", "CHEF"]),
+  menuController.getAllMenus
+);
