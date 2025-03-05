@@ -15,3 +15,32 @@ const generateMenuImageUrls = (menus) => {
     });
   });
 };
+
+export const getAllMenus = async (restaurantId) => {
+  const menus = await prisma.menu.findMany({
+    where: {
+      restaurantId,
+      deletedAt: null,
+    },
+    include: {
+      menuItems: {
+        where: {
+          isAvailable: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          price: true,
+          imageUrl: true,
+          isAvailable: true,
+        },
+      },
+    },
+  });
+
+  generateMenuImageUrls(menus);
+
+  return menus;
+};
+
