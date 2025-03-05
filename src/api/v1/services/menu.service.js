@@ -123,3 +123,8 @@ export const deleteMenu = async (id) => {
   const deletedMenu = await softDelete("menu", id);
   return deletedMenu;
 };
+
+export const restoreMenu = async (id) => {
+  const restoredMenu = await restore("menu", id);
+  return restoredMenu;
+};
