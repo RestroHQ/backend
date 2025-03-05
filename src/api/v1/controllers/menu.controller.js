@@ -48,9 +48,12 @@ export const updateMenu = async (req, res) => {
   }
 };
 
-module.exports = {
-  createMenuCategory,
-  getMenuCategoriesByRestaurant,
-  createMenuItem,
-  getMenuItemsByCategory,
+export const deleteMenu = async (req, res) => {
+  try {
+    const { menuId } = req.params;
+    await menuService.deleteMenu(menuId);
+    res.json({ message: "Menu deleted successfully" });
+  } catch (error) {
+    errorHandler(error, res);
+  }
 };
