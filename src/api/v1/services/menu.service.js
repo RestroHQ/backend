@@ -44,3 +44,31 @@ export const getAllMenus = async (restaurantId) => {
   return menus;
 };
 
+export const getMenuById = async (id) => {
+  const menu = await prisma.menu.findUnique({
+    where: {
+      id,
+      deletedAt: null,
+    },
+    include: {
+      menuItems: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          price: true,
+          imageUrl: true,
+          isAvailable: true,
+        },
+      },
+    },
+  });
+
+  if (!menu) {
+    throw new Error("Menu not found");
+  }
+
+  generateMenuImageUrls([menu]);
+
+  return menu;
+};
