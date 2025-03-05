@@ -79,3 +79,13 @@ export const updateMenuItem = async (req, res) => {
     errorHandler(error, res);
   }
 };
+
+export const deleteMenuItem = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    await menuService.deleteMenuItem(itemId);
+    res.json({ message: "Menu item deleted successfully" });
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
