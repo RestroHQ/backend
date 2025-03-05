@@ -12,15 +12,14 @@ export const getAllMenus = async (req, res) => {
   }
 };
 
-// Controller for fetching menu categories by restaurant
-const getMenuCategoriesByRestaurant = async (req, res, next) => {
+export const getMenuById = async (req, res) => {
   try {
-    const { restaurantId } = req.params;
-    const categories =
-      await menuService.getMenuCategoriesByRestaurant(restaurantId);
-    res.json(categories);
+    const { menuId } = req.params;
+
+    const menu = await menuService.getMenuById(menuId);
+    res.json(menu);
   } catch (error) {
-    next(error);
+    errorHandler(error, res);
   }
 };
 
