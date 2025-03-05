@@ -118,3 +118,8 @@ export const updateMenu = async (id, data) => {
 
   return menu;
 };
+
+export const deleteMenu = async (id) => {
+  const deletedMenu = await softDelete("menu", id);
+  return deletedMenu;
+};
