@@ -59,3 +59,12 @@ router.patch(
     authorizeRestaurantRole(["OWNER", "MANAGER"]),
     menuController.createMenuItem
   );
+
+  router.patch(
+    "/:menuId/items/:itemId",
+    authenticateStaff,
+    validate(updateMenuItemSchema),
+    authorizeRestaurantRole(["OWNER", "MANAGER"]),
+    menuController.updateMenuItem
+  );
+  
