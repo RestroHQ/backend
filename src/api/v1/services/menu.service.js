@@ -128,3 +128,15 @@ export const restoreMenu = async (id) => {
   const restoredMenu = await restore("menu", id);
   return restoredMenu;
 };
+
+export const createMenuItem = async (data) => {
+  const menuItem = await prisma.menuItem.create({
+    data,
+  });
+
+  if (menuItem.imageUrl) {
+    menuItem.imageUrl = await generateDownloadUrl(menuItem.imageUrl);
+  }
+
+  return menuItem;
+};
