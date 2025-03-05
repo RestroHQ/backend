@@ -57,3 +57,14 @@ export const deleteMenu = async (req, res) => {
     errorHandler(error, res);
   }
 };
+
+export const createMenuItem = async (req, res) => {
+  try {
+    const { menuId } = req.params;
+    const data = { ...req.body, menuId };
+    const menuItem = await menuService.createMenuItem(data);
+    res.status(201).json(menuItem);
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
