@@ -37,14 +37,14 @@ export const createMenu = async (req, res) => {
 };
 
 
-// Controller for fetching menu items by category
-const getMenuItemsByCategory = async (req, res, next) => {
+export const updateMenu = async (req, res) => {
   try {
-    const { categoryId } = req.params;
-    const items = await menuService.getMenuItemsByCategory(categoryId);
-    res.json(items);
+    const { menuId } = req.params;
+    const data = req.body;
+    const menu = await menuService.updateMenu(menuId, data);
+    res.json(menu);
   } catch (error) {
-    next(error);
+    errorHandler(error, res);
   }
 };
 
