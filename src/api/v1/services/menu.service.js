@@ -72,3 +72,35 @@ export const getMenuById = async (id) => {
 
   return menu;
 };
+
+export const createMenu = async (data) => {
+  const { name, description, isActive, menuItems, restaurantId } = data;
+
+  const menu = await prisma.menu.create({
+    data: {
+      name,
+      description,
+      isActive,
+      restaurantId,
+    },
+    include: {
+      menuItems: true,
+    },
+  });
+
+  if (menuItems && menuItems.length > 0) {
+    await prisma.menuItem.createMany({
+      data: menuItems.map((item) => ({
+        ...item,
+        menuId: menu.id,
+      })),
+    });
+  }
+
+  const menuWithItems = await prisma.menu.findUnique({
+    where: { id: menu.id },
+    include: { menuItems: true },
+  });
+
+  return menuWithItems;
+};
