@@ -51,3 +51,11 @@ router.patch(
     authorizeRestaurantRole(["OWNER", "MANAGER"]),
     menuController.deleteMenu
   );
+
+  router.post(
+    "/:menuId/items",
+    authenticateStaff,
+    validate(createMenuItemSchema),
+    authorizeRestaurantRole(["OWNER", "MANAGER"]),
+    menuController.createMenuItem
+  );
