@@ -68,3 +68,14 @@ export const createMenuItem = async (req, res) => {
     errorHandler(error, res);
   }
 };
+
+export const updateMenuItem = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const data = req.body;
+    const menuItem = await menuService.updateMenuItem(itemId, data);
+    res.json(menuItem);
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
