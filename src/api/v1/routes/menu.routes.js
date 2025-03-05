@@ -24,3 +24,15 @@ router.get(
   authorizeRestaurantRole(["OWNER", "MANAGER", "CASHIER", "WAITER", "CHEF"]),
   menuController.getAllMenus
 );
+
+router.get("/:menuId", menuController.getMenuById);
+
+router.post(
+  "/",
+  authenticateStaff,
+  validate(createMenuSchema),
+  authorizeRestaurantRole(["OWNER", "MANAGER"]),
+  validateSubscription,
+  checkResourceLimit("menus"),
+  menuController.createMenu
+);
