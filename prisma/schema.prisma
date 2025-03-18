@@ -45,7 +45,6 @@ model Customer {
   restaurantId         String
 
   restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
-  createdOrders Order[]       @relation("CustomerCreatedOrders")
   reservations  Reservation[]
   waitlists     Waitlist[]
   reviews       Review[]
@@ -113,7 +112,6 @@ model RestaurantStaff {
 
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdOrders Order[]    @relation("StaffCreatedOrders")
 
   @@unique([restaurantId, userId])
   @@index([restaurantId, role])
@@ -151,8 +149,6 @@ model Order {
 
   restaurant        Restaurant       @relation("RestaurantOrders", fields: [restaurantId], references: [id], onDelete: Restrict)
   table             Table?           @relation(fields: [tableId], references: [id], onDelete: SetNull)
-  createdByStaff    RestaurantStaff? @relation("StaffCreatedOrders", fields: [createdById], references: [id], map: "Order_createdByStaff_fkey")
-  createdByCustomer Customer?        @relation("CustomerCreatedOrders", fields: [createdById], references: [id], map: "Order_createdByCustomer_fkey")
 
   @@index([createdById])
   @@index([sessionId])
