@@ -6,12 +6,14 @@ import jwt from "jsonwebtoken";
 export const authenticateCustomer = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
-
+    
     if (!token) {
       return errorHandler("Authentication required", res, 401);
     }
-
+    
     const decoded = jwt.verify(token, config.CUSTOMER_JWT_SECRET);
+    
+    console.log(decoded);
 
     if (!decoded.customerId) {
       return errorHandler("Invalid token type", res, 401);
@@ -24,6 +26,8 @@ export const authenticateCustomer = async (req, res, next) => {
         deletedAt: null,
       },
     });
+
+    console.log(customer);
 
     if (!customer) {
       return errorHandler("Customer not found or inactive", res, 401);

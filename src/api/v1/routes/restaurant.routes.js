@@ -14,6 +14,10 @@ import {
 import { staffRouter } from "./staff.routes";
 import { subscriptionRouter } from "./subscription.routes";
 import { usageRouter } from "./usage.router";
+import { reservationRouter } from "./reservation.routes.js";
+import { customerRouter } from "./customer.routes";
+import { tableRouter } from "./table.routes";
+import { timeSlotRouter } from "./time-slot.routes";
 
 const router = express.Router();
 
@@ -57,5 +61,8 @@ router.delete(
 router.use("/:restaurantId/usage", usageRouter);
 router.use("/:restaurantId/staff", staffRouter);
 router.use("/:restaurantId/subscription", subscriptionRouter);
-
+router.use("/:restaurantId/reservations", reservationRouter);  // ✅ Add this line
+router.use("/:restaurantId/customers", customerRouter);  // ✅ Add this line
+router.use("/:restaurantId/table", tableRouter);
+router.use("/:restaurantId/timeslot", timeSlotRouter);
 export const restaurantRouter = router;
