@@ -14,10 +14,15 @@ import {
 import { staffRouter } from "./staff.routes";
 import { subscriptionRouter } from "./subscription.routes";
 import { usageRouter } from "./usage.router";
+<<<<<<< HEAD
 import { reservationRouter } from "./reservation.routes.js";
 import { customerRouter } from "./customer.routes";
 import { tableRouter } from "./table.routes";
 import { timeSlotRouter } from "./time-slot.routes";
+=======
+import { orderRouter } from "./order.routes";
+import { menuRouter } from "./menu.routes";
+>>>>>>> 61399920d44996c940d4a1e7f795c489b7e2fcca
 
 const router = express.Router();
 
@@ -61,8 +66,14 @@ router.delete(
 router.use("/:restaurantId/usage", usageRouter);
 router.use("/:restaurantId/staff", staffRouter);
 router.use("/:restaurantId/subscription", subscriptionRouter);
+<<<<<<< HEAD
 router.use("/:restaurantId/reservations", reservationRouter);  // ✅ Add this line
 router.use("/:restaurantId/customers", customerRouter);  // ✅ Add this line
 router.use("/:restaurantId/table", tableRouter);
 router.use("/:restaurantId/timeslot", timeSlotRouter);
+=======
+router.use("/:restaurantId/orders", orderRouter);
+router.use("/:restaurantId/menus", menuRouter);
+
+>>>>>>> 61399920d44996c940d4a1e7f795c489b7e2fcca
 export const restaurantRouter = router;

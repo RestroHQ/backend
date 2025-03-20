@@ -19,6 +19,9 @@ export const createOrder = async (data, creator, creatorType) => {
   // Calculate order totals
   const { subtotal, tax, total } = calculateOrderTotals(items, menuItems);
 
+  console.log("creator", creator);
+  console.log("creatorType", creatorType);
+
   // Create order with items
   const order = await prisma.order.create({
     data: {
