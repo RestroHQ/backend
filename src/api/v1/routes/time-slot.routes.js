@@ -14,6 +14,15 @@ import * as timeSlotController from "../controllers/time-slot.controller";
 
 const router = express.Router({ mergeParams: true });
 
+
+
+router.get(
+  "/available-time-slots",
+  validate(timeSlotQuerySchema),
+  timeSlotController.getAvailableTimeSlots
+);
+
+
 router.post(
   "/",
   authenticateStaff,
@@ -32,10 +41,6 @@ router.patch(
   timeSlotController.updateTimeSlot
 );
 
-router.get(
-  "/restaurant/:restaurantId/available-time-slots",
-  validate(timeSlotQuerySchema),
-  timeSlotController.getAvailableTimeSlots
-);
+
 
 export const timeSlotRouter = router;

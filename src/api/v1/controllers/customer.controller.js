@@ -3,7 +3,11 @@ import * as customerService from "../services/customer.service";
 
 export const registerCustomer = async (req, res) => {
   try {
-    const result = await customerService.registerCustomer(req.body);
+    const { restaurantId } = req.params;
+    const result = await customerService.registerCustomer({
+      ...req.body,
+      restaurantId,
+    });
     res.status(201).json(result);
   } catch (error) {
     errorHandler(error, res);

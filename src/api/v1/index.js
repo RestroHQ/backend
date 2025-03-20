@@ -21,6 +21,7 @@ router.use("/restaurants", restaurantRouter);
 router.use("/files", fileRouter);
 router.use("/plans", planRouter);
 
+
 // NOTE: Moved other routes to the `restaurant.routes.js` file
 
 export const v1Router = router;

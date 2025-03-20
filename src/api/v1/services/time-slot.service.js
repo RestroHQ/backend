@@ -69,10 +69,15 @@ export const updateTimeSlot = async (id, data) => {
 };
 
 export const getAvailableTimeSlots = async (restaurantId, date, guestCount) => {
-  const startOfDay = new Date(date);
+  const parsedDate = new Date(date);
+  if (isNaN(parsedDate)) {
+    throw new Error("Invalid date provided");
+  }
+
+  const startOfDay = new Date(parsedDate);
   startOfDay.setHours(0, 0, 0, 0);
 
-  const endOfDay = new Date(date);
+  const endOfDay = new Date(parsedDate);
   endOfDay.setHours(23, 59, 59, 999);
 
   const timeSlots = await prisma.timeSlot.findMany({
