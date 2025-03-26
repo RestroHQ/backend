@@ -176,7 +176,6 @@ export const getRestaurantReservations = async (
   const pageInt = parseInt(page, 10) || 1; // Ensure valid page number
   const limitInt = parseInt(limit, 10) || 10; // Ensure valid limit
   const offset = (pageInt - 1) * limitInt;
-
   const where = { restaurantId };
 
   if (status) {

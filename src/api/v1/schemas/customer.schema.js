@@ -1,15 +1,28 @@
-const { z } = require("zod");
+import { z } from "zod";
 
-const customerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z
-    .string()
-    .min(10, "Phone number must have at least 10 digits")
-    .optional(),
-  address: z.string().min(1, "Address is required"),
-  createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date()),
+export const registerCustomerSchema = z.object({
+  name: z.string().min(2).max(50),
+  email: z.string().email(),
+  username: z.string().min(3).max(20).optional(),
+  password: z.string().min(6),
+  phone: z.string().min(10).max(20).optional(),
 });
 
-module.exports = customerSchema;
+export const loginCustomerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+export const updateCustomerSchema = z.object({
+  name: z.string().min(2).max(50).optional(),
+  username: z.string().min(3).max(20).optional(),
+  phone: z.string().min(10).max(20).optional(),
+  image: z.string().optional(),
+});
+
+export const customerPaginationSchema = z.object({
+  page: z.string().transform(Number).default("1"),
+  limit: z.string().transform(Number).default("10"),
+  sortBy: z.enum(["name", "email", "createdAt"]).default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+});

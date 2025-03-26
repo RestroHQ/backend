@@ -45,7 +45,6 @@ model Customer {
   restaurantId         String
 
   restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
-  createdOrders Order[]       @relation("CustomerCreatedOrders")
   reservations  Reservation[]
   waitlists     Waitlist[]
   reviews       Review[]
@@ -80,7 +79,9 @@ model Restaurant {
   status            RestaurantStatus @default(ACTIVE)
   isActive          Boolean          @default(true)
   ownerId           String
+  storageUsed       Int              @default(0)
 
+  subscription Subscription?
   staff        RestaurantStaff[]
   orders       Order[]           @relation("RestaurantOrders")
   tables       Table[]           @relation("RestaurantTables")
@@ -91,8 +92,6 @@ model Restaurant {
   reviews      Review[]          @relation("RestaurantReviews")
   customers    Customer[]
   emailsList   EmailsList[]
-  posSession   PosSession[]
-  cashRegister CashRegister[]
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -111,11 +110,8 @@ model RestaurantStaff {
   role         RestaurantRole
   joinedAt     DateTime       @default(now())
 
-  restaurant        Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  posSession        PosSession[]
-  cashRegisterEntry CashRegisterEntry[]
-  createdOrders     Order[]             @relation("StaffCreatedOrders")
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([restaurantId, userId])
   @@index([restaurantId, role])
@@ -153,9 +149,6 @@ model Order {
 
   restaurant        Restaurant       @relation("RestaurantOrders", fields: [restaurantId], references: [id], onDelete: Restrict)
   table             Table?           @relation(fields: [tableId], references: [id], onDelete: SetNull)
-  createdByStaff    RestaurantStaff? @relation("StaffCreatedOrders", fields: [createdById], references: [id], map: "Order_createdByStaff_fkey")
-  createdByCustomer Customer?        @relation("CustomerCreatedOrders", fields: [createdById], references: [id], map: "Order_createdByCustomer_fkey")
-  session           PosSession?      @relation(fields: [sessionId], references: [id])
 
   @@index([createdById])
   @@index([sessionId])
@@ -358,73 +351,44 @@ model EmailsList {
   @@index([email, isActive])
 }
 
-model PosSession {
-  id             String              @id @default(cuid())
-  restaurantId   String
-  cashRegisterId String
-  cashierId      String
-  openingBalance Decimal             @db.Decimal(10, 2)
-  closingBalance Decimal             @db.Decimal(10, 2)
-  actualBalance  Decimal?            @db.Decimal(10, 2)
-  discrepancy    Decimal?            @db.Decimal(10, 2)
-  startTime      DateTime            @default(now())
-  endTime        DateTime?
-  notes          String?
-  orders         Order[]
-  entries        CashRegisterEntry[]
+model SubscriptionPlan {
+  id              String                 @id @default(cuid())
+  name            String                 @unique
+  tier            SubscriptionTier
+  status          SubscriptionPlanStatus @default(ACTIVE)
+  stripePriceId   String                 @unique @map("stripe_price_id")
+  stripeProductId String
+  price           Decimal                @db.Decimal(10, 2)
+  currency        String                 @default("usd")
+  interval        String
+  isActive        Boolean                @default(true)
+
+  subscriptions Subscription[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  restaurant   Restaurant      @relation(fields: [restaurantId], references: [id])
-  cashRegister CashRegister    @relation(fields: [cashRegisterId], references: [id])
-  cashier      RestaurantStaff @relation(fields: [cashierId], references: [id])
-
-  @@index([restaurantId])
-  @@index([cashRegisterId])
-  @@index([cashierId])
+  @@index([tier, isActive])
 }
 
-model CashRegister {
-  id             String              @id @default(cuid())
-  restaurantId   String
-  name           String
-  status         CashRegisterStatus  @default(CLOSED)
-  currentBalance Decimal             @db.Decimal(10, 2)
-  lastOpenedAt   DateTime?
-  lastClosedAt   DateTime?
-  lastOpenedBy   String?
-  lastClosedBy   String?
-  notes          String?
-  sessions       PosSession[]
-  entries        CashRegisterEntry[]
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
+model Subscription {
+  id                   String             @id @default(cuid())
+  restaurantId         String             @unique
+  planId               String
+  stripeCustomerId     String?            @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?            @unique @map("stripe_subscription_id")
+  status               SubscriptionStatus @default(ACTIVE)
+  startDate            DateTime           @default(now())
+  endDate              DateTime           @map("stripe_current_period_end")
+  cancelledAt          DateTime?
+  lastBillingDate      DateTime?
+  nextBillingDate      DateTime?
 
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurant Restaurant       @relation(fields: [restaurantId], references: [id])
+  plan       SubscriptionPlan @relation(fields: [planId], references: [id])
 
   @@index([restaurantId])
-}
-
-model CashRegisterEntry {
-  id             String                @id @default(cuid())
-  cashRegisterId String
-  sessionId      String?
-  type           CashRegisterEntryType
-  amount         Decimal               @db.Decimal(10, 2)
-  balance        Decimal               @db.Decimal(10, 2)
-  notes          String?
-  performedBy    String
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-
-  cashRegister CashRegister    @relation(fields: [cashRegisterId], references: [id])
-  session      PosSession?     @relation(fields: [sessionId], references: [id])
-  staff        RestaurantStaff @relation(fields: [performedBy], references: [id])
-
-  @@index([cashRegisterId])
-  @@index([sessionId])
-  @@index([performedBy])
+  @@index([planId])
 }
 
 enum Role {
@@ -519,4 +483,22 @@ enum CashRegisterEntryType {
   CASH_IN
   CASH_OUT
   CLOSING_BALANCE
+}
+
+enum SubscriptionPlanStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SubscriptionTier {
+  STARTER
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
 }

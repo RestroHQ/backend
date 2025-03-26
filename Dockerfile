@@ -31,7 +31,6 @@ COPY . .
 # Build using Babel
 RUN pnpm run build
 
-
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3001

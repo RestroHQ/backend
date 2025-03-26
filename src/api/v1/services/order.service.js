@@ -1,6 +1,29 @@
 import { prisma } from "@/lib/prisma";
 import { calculateOrderTotals } from "@/lib/utils";
 
+const validateStatusTransition = (currentStatus, newStatus, user) => {
+  // Allow transitions where the current status and new status are the same
+  if (currentStatus === newStatus) {
+    return;
+  }
+
+  const validTransitions = {
+    PENDING: ["PREPARING", "READY", "CANCELLED"],
+    PREPARING: ["READY", "CANCELLED"],
+    READY: ["COMPLETED", "CANCELLED"],
+    COMPLETED: [],
+    CANCELLED: [],
+  };
+
+  if (!validTransitions[currentStatus]?.includes(newStatus)) {
+    throw new Error(
+      `Invalid status transition from ${currentStatus} to ${newStatus}`
+    );
+  }
+
+  // Additional validation logic (e.g., user permissions) can be added here
+};
+
 export const createOrder = async (data, creator, creatorType) => {
   const { items, ...orderData } = data;
 
@@ -18,6 +41,9 @@ export const createOrder = async (data, creator, creatorType) => {
 
   // Calculate order totals
   const { subtotal, tax, total } = calculateOrderTotals(items, menuItems);
+
+  console.log("creator", creator);
+  console.log("creatorType", creatorType);
 
   // Create order with items
   const order = await prisma.order.create({
@@ -55,8 +81,8 @@ export const updateOrderStatus = async (orderId, status, user) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: {
-      createdByStaff: true,
-      createdByCustomer: true,
+      items: true,
+      table: true,
     },
   });
 
@@ -105,20 +131,6 @@ export const getOrders = async (restaurantId, filters) => {
       include: {
         items: true,
         table: true,
-        createdByStaff: {
-          include: {
-            user: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
-        createdByCustomer: {
-          select: {
-            name: true,
-          },
-        },
       },
       skip: (page - 1) * limit,
       take: limit,

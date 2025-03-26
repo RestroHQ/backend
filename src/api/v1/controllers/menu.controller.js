@@ -1,53 +1,91 @@
-const menuService = require("../services/menu.service");
+import { errorHandler } from "@/lib/error-handler";
+import * as menuService from "../services/menu.service";
 
-// Controller for creating a menu category
-const createMenuCategory = async (req, res, next) => {
-  try {
-    const data = req.body;
-    const category = await menuService.createMenuCategory(data);
-    res.status(201).json(category);
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Controller for fetching menu categories by restaurant
-const getMenuCategoriesByRestaurant = async (req, res, next) => {
+export const getAllMenus = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const categories =
-      await menuService.getMenuCategoriesByRestaurant(restaurantId);
-    res.json(categories);
+
+    const menus = await menuService.getAllMenus(restaurantId);
+    res.json(menus);
   } catch (error) {
-    next(error);
+    errorHandler(error, res);
   }
 };
 
-// Controller for creating a menu item
-const createMenuItem = async (req, res, next) => {
+export const getMenuById = async (req, res) => {
   try {
+    const { menuId } = req.params;
+
+    const menu = await menuService.getMenuById(menuId);
+    res.json(menu);
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
+
+export const createMenu = async (req, res) => {
+  try {
+    const { restaurantId } = req.params;
+    const data = { ...req.body, restaurantId };
+
+    const menu = await menuService.createMenu(data);
+
+    res.status(201).json(menu);
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
+
+
+export const updateMenu = async (req, res) => {
+  try {
+    const { menuId } = req.params;
     const data = req.body;
-    const item = await menuService.createMenuItem(data);
-    res.status(201).json(item);
+    const menu = await menuService.updateMenu(menuId, data);
+    res.json(menu);
   } catch (error) {
-    next(error);
+    errorHandler(error, res);
   }
 };
 
-// Controller for fetching menu items by category
-const getMenuItemsByCategory = async (req, res, next) => {
+export const deleteMenu = async (req, res) => {
   try {
-    const { categoryId } = req.params;
-    const items = await menuService.getMenuItemsByCategory(categoryId);
-    res.json(items);
+    const { menuId } = req.params;
+    await menuService.deleteMenu(menuId);
+    res.json({ message: "Menu deleted successfully" });
   } catch (error) {
-    next(error);
+    errorHandler(error, res);
   }
 };
 
-module.exports = {
-  createMenuCategory,
-  getMenuCategoriesByRestaurant,
-  createMenuItem,
-  getMenuItemsByCategory,
+export const createMenuItem = async (req, res) => {
+  try {
+    const { menuId } = req.params;
+    const data = { ...req.body, menuId };
+    const menuItem = await menuService.createMenuItem(data);
+    res.status(201).json(menuItem);
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
+
+export const updateMenuItem = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const data = req.body;
+    const menuItem = await menuService.updateMenuItem(itemId, data);
+    res.json(menuItem);
+  } catch (error) {
+    errorHandler(error, res);
+  }
+};
+
+export const deleteMenuItem = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    await menuService.deleteMenuItem(itemId);
+    res.json({ message: "Menu item deleted successfully" });
+  } catch (error) {
+    errorHandler(error, res);
+  }
 };

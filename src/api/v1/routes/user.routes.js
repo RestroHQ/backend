@@ -4,7 +4,12 @@ import { authenticate, authorize } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.get("/", authenticate, authorize(["ADMIN"]), userController.getAllUsers);
+router.get(
+  "/",
+  authenticate,
+  authorize(["ADMIN"]),
+  userController.getAllUsers
+);
 router.get("/me", authenticate, userController.getCurrentUser);
 router.get(
   "/:id",
