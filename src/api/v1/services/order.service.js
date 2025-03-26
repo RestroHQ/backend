@@ -108,20 +108,6 @@ export const getOrders = async (restaurantId, filters) => {
       include: {
         items: true,
         table: true,
-        createdByStaff: {
-          include: {
-            user: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
-        createdByCustomer: {
-          select: {
-            name: true,
-          },
-        },
       },
       skip: (page - 1) * limit,
       take: limit,
