@@ -12,8 +12,6 @@ export const authenticateCustomer = async (req, res, next) => {
     }
     
     const decoded = jwt.verify(token, config.CUSTOMER_JWT_SECRET);
-    
-    console.log(decoded);
 
     if (!decoded.customerId) {
       return errorHandler("Invalid token type", res, 401);
@@ -27,7 +25,9 @@ export const authenticateCustomer = async (req, res, next) => {
       },
     });
 
-    console.log(customer);
+    if (!customer) {
+      return errorHandler("Customer not found or inactive", res, 401);
+    }
 
     if (!customer) {
       return errorHandler("Customer not found or inactive", res, 401);

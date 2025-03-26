@@ -21,7 +21,7 @@ import { timeSlotRouter } from "./time-slot.routes";
 import { orderRouter } from "./order.routes";
 import { menuRouter } from "./menu.routes";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.get(
   "/",
@@ -63,9 +63,9 @@ router.delete(
 router.use("/:restaurantId/usage", usageRouter);
 router.use("/:restaurantId/staff", staffRouter);
 router.use("/:restaurantId/subscription", subscriptionRouter);
-router.use("/:restaurantId/reservations", reservationRouter);  // ✅ Add this line
-router.use("/:restaurantId/customers", customerRouter);  // ✅ Add this line
-router.use("/:restaurantId/table", tableRouter);
+router.use("/:restaurantId/reservations", reservationRouter);
+router.use("/:restaurantId/customers", customerRouter);
+router.use("/:restaurantId/tables", tableRouter);
 router.use("/:restaurantId/timeslot", timeSlotRouter);
 router.use("/:restaurantId/orders", orderRouter);
 router.use("/:restaurantId/menus", menuRouter);

@@ -31,7 +31,8 @@ router.post(
 
 router.patch(
   "/:reservationId",
-  authenticateCustomer,
+  authenticateStaff,
+  authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
   validate(updateReservationSchema),
   reservationController.updateReservation
 );
@@ -45,7 +46,8 @@ router.get(
 
 router.get(
   "/:reservationId",
-  authenticateCustomer,
+  authenticateStaff,
+  authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
   reservationController.getReservationById
 );
 
