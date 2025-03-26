@@ -3,8 +3,13 @@ import * as reservationService from "../services/reservation.service";
 
 export const createReservation = async (req, res) => {
   try {
-    const { id: customerId } = req.customer;
-    const { id: userId } = req.user;
+    // Ensure user and customer exist before destructuring
+    if (!req.user && !req.customer) {
+      return res.status(400).json({ error: "User authentication missing" });
+    }
+
+    const customerId = req.customer?.id;
+    const userId  = req.user?.id;
     const { restaurantId } = req.params;
 
     const data = {
@@ -12,10 +17,15 @@ export const createReservation = async (req, res) => {
       restaurantId,
     };
 
-    const reservation = await reservationService.createReservation(
-      req.body,
-      req.user.id
-    );
+    if (customerId) {
+      data.customerId = customerId;
+    }
+
+    if (userId) {
+      data.userId = userId;
+    }
+
+    const reservation = await reservationService.createReservation(data);
     res.status(201).json(reservation);
   } catch (error) {
     errorHandler(error, res);

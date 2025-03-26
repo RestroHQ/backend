@@ -14,7 +14,7 @@ import { reservationRouter } from "./reservation.routes";
 import { reviewRouter } from "./review.routes";
 import { tableRouter } from "./table.routes";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.get(
   "/",
@@ -51,30 +51,14 @@ router.delete(
   restaurantController.deleteRestaurant
 );
 
-router.get(
-  "/:restaurantId/staff",
-  authenticate,
-  authorize(["USER"]),
-  validate(paginationSchema),
-  restaurantController.getRestaurantStaff
-);
-
-router.post(
-  "/:restaurantId/staff",
-  authenticate,
-  authorize(["USER"]),
-  validate(addStaffSchema),
-  restaurantController.addRestaurantStaff
-);
-
-router.delete(
-  "/:restaurantId/staff/:userId",
-  authenticate,
-  authorize(["USER"]),
-  restaurantController.removeRestaurantStaff
-);
-
-router.use("/:restaurantId/customers", customerRouter);
+router.use("/:restaurantId/usage", usageRouter);
+router.use("/:restaurantId/staff", staffRouter);
+router.use("/:restaurantId/subscription", subscriptionRouter);
+router.use("/:restaurantId/reservations", reservationRouter);  // ✅ Add this line
+router.use("/:restaurantId/customers", customerRouter);  // ✅ Add this line
+router.use("/:restaurantId/tables", tableRouter);
+router.use("/:restaurantId/timeslot", timeSlotRouter);
+router.use("/:restaurantId/orders", orderRouter);
 router.use("/:restaurantId/menus", menuRouter);
 router.use("/:restaurantId/reservations", reservationRouter);
 router.use("/:restaurantId/reviews", reviewRouter);

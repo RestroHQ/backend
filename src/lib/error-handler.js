@@ -5,6 +5,8 @@ export const errorHandler = (error, res, code = 400) => {
   let type = "Unknown Error";
   let messages = [];
 
+  console.log(error);
+
   if (error.message) {
     messages.push(error.message);
   } else {

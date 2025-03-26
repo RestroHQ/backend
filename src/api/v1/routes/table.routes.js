@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  authenticateStaff,
+  authenticate,
   authorize,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
@@ -12,7 +12,7 @@ const router = express.Router({ mergeParams: true });
 
 router.post(
   "/",
-  authenticateStaff,
+  authenticate,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(createTableSchema),
@@ -21,7 +21,7 @@ router.post(
 
 router.patch(
   "/:tableId",
-  authenticateStaff,
+  authenticate,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(updateTableSchema),

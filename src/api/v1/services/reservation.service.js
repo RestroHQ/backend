@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
 
-export const createReservation = async (data, customerId, restaurantId) => {
+export const createReservation = async (data) => {
   const timeSlot = await prisma.timeSlot.findFirst({
     where: {
       id: data.timeSlotId,
-      restaurantId,
+      restaurantId: data.restaurantId,
       isAvailable: true,
     },
   });
@@ -16,7 +16,7 @@ export const createReservation = async (data, customerId, restaurantId) => {
   const table = await prisma.table.findFirst({
     where: {
       id: data.tableId,
-      restaurantId,
+      restaurantId: data.restaurantId,
       isAvailable: true,
       capacity: {
         gte: data.guestCount,
@@ -31,8 +31,8 @@ export const createReservation = async (data, customerId, restaurantId) => {
   // Check if customer belongs to the restaurant
   const customer = await prisma.customer.findFirst({
     where: {
-      id: customerId,
-      restaurantId,
+      id: data.customerId,
+      restaurantId: data.restaurantId,
       isActive: true,
     },
   });
@@ -43,10 +43,21 @@ export const createReservation = async (data, customerId, restaurantId) => {
 
   const reservation = await prisma.reservation.create({
     data: {
-      ...data,
-      customerId,
-      restaurantId,
+      guestCount: data.guestCount,
+      notes: data?.notes,	
       status: "PENDING",
+      restaurant: {
+        connect: { id: data.restaurantId } // Ensure the restaurant is connected by its ID
+      },
+      table: {
+        connect: { id: data.tableId } // Ensure the table is connected by its ID
+      },
+      customer: {
+        connect: { id: data.customerId } // Ensure the customer is connected by its ID
+      },
+      timeSlot: {
+        connect: { id: data.timeSlotId } // Ensure the time slot is connected by its ID
+      },
     },
     include: {
       table: true,
@@ -65,35 +76,19 @@ export const createReservation = async (data, customerId, restaurantId) => {
   return reservation;
 };
 
-export const updateReservation = async (id, data, customerId) => {
+export const updateReservation = async (id, data) => {
   const reservation = await prisma.reservation.findUnique({
     where: { id },
-    include: { customer: true },
   });
 
   if (!reservation) {
     throw new Error("Reservation not found");
   }
 
-  if (reservation.customerId !== customerId) {
-    throw new Error("Unauthorized to update this reservation");
-  }
 
   const updatedReservation = await prisma.reservation.update({
     where: { id },
     data,
-    include: {
-      table: true,
-      timeSlot: true,
-      customer: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-        },
-      },
-    },
   });
 
   return updatedReservation;
@@ -120,10 +115,6 @@ export const getReservationById = async (id, customerId) => {
     throw new Error("Reservation not found");
   }
 
-  if (reservation.customerId !== customerId) {
-    throw new Error("Unauthorized to view this reservation");
-  }
-
   return reservation;
 };
 
@@ -131,7 +122,9 @@ export const getCustomerReservations = async (
   customerId,
   { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = {}
 ) => {
-  const offset = (page - 1) * limit;
+  const pageInt = parseInt(page, 10) || 1; // Ensure valid page number
+  const limitInt = parseInt(limit, 10) || 10; // Ensure valid limit
+  const offset = (pageInt - 1) * limitInt;
 
   try {
     const reservations = await prisma.reservation.findMany({
@@ -151,7 +144,7 @@ export const getCustomerReservations = async (
         [sortBy]: sortOrder,
       },
       skip: offset,
-      take: limit,
+      take: limitInt, // Ensure the limit is passed as the take argument
     });
 
     const total = await prisma.reservation.count({ where: { customerId } });
@@ -160,9 +153,9 @@ export const getCustomerReservations = async (
       reservations,
       pagination: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: pageInt,
+        limit: limitInt,
+        totalPages: Math.ceil(total / limitInt),
       },
     };
   } catch (error) {
@@ -180,8 +173,8 @@ export const getRestaurantReservations = async (
     status,
   } = {}
 ) => {
-  const pageInt = parseInt(page);
-  const limitInt = parseInt(limit);
+  const pageInt = parseInt(page, 10) || 1; // Ensure valid page number
+  const limitInt = parseInt(limit, 10) || 10; // Ensure valid limit
   const offset = (pageInt - 1) * limitInt;
 
   const where = { restaurantId };
@@ -209,7 +202,7 @@ export const getRestaurantReservations = async (
         [sortBy]: sortOrder,
       },
       skip: offset,
-      take: limitInt, // Add the take parameter with the converted limit value
+      take: limitInt, // Ensure the limit is passed as the take argument
     });
 
     const total = await prisma.reservation.count({ where });

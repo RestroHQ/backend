@@ -1,7 +1,7 @@
 import express from "express";
 import * as reservationController from "../controllers/reservation.controller";
 import {
-  authenticateStaff,
+  authenticate,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
 import { authenticateCustomer } from "../middlewares/customer.middleware";
@@ -16,7 +16,7 @@ const router = express.Router({ mergeParams: true });
 
 router.get(
   "/",
-  authenticateStaff,
+  authenticate,
   authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
   validate(paginationSchema),
   reservationController.getRestaurantReservations
@@ -31,7 +31,8 @@ router.post(
 
 router.patch(
   "/:reservationId",
-  authenticateCustomer,
+  authenticate,
+  authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
   validate(updateReservationSchema),
   reservationController.updateReservation
 );
@@ -45,7 +46,8 @@ router.get(
 
 router.get(
   "/:reservationId",
-  authenticateCustomer,
+  authenticate,
+  authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
   reservationController.getReservationById
 );
 

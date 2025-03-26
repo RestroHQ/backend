@@ -40,11 +40,11 @@ export const updateTable = async (id, data) => {
   });
 };
 
-export const getAvailableTables = async (
-  restaurantId,
-  timeSlotId,
-  guestCount
-) => {
+export const getAvailableTables = async (restaurantId, timeSlotId, guestCount) => {
+  if (!timeSlotId) {
+    throw new Error("timeSlotId is required but was not provided");
+  }
+
   const timeSlot = await prisma.timeSlot.findUnique({
     where: { id: timeSlotId },
   });
@@ -53,7 +53,6 @@ export const getAvailableTables = async (
     throw new Error("Time slot not found");
   }
 
-  // Find tables that are available and have sufficient capacity
   const tables = await prisma.table.findMany({
     where: {
       restaurantId,
@@ -61,7 +60,6 @@ export const getAvailableTables = async (
       capacity: {
         gte: guestCount,
       },
-      // Exclude tables that have reservations during this time slot
       NOT: {
         reservations: {
           some: {
@@ -74,7 +72,7 @@ export const getAvailableTables = async (
       },
     },
     orderBy: {
-      capacity: "asc", // Get smallest suitable table first
+      capacity: "asc",
     },
   });
 
