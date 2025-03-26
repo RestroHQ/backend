@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as menuController from "../controllers/menu.controller";
 import {
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
@@ -20,7 +20,7 @@ const router = Router({ mergeParams: true });
 
 router.get(
   "/",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER", "MANAGER", "CASHIER", "WAITER", "CHEF"]),
   menuController.getAllMenus
 );
@@ -29,7 +29,7 @@ router.get("/:menuId", menuController.getMenuById);
 
 router.post(
   "/",
-  authenticate,
+  authenticateStaff,
   validate(createMenuSchema),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validateSubscription,
@@ -39,7 +39,7 @@ router.post(
 
 router.patch(
     "/:menuId",
-    authenticate,
+    authenticateStaff,
     validate(updateMenuSchema),
     authorizeRestaurantRole(["OWNER", "MANAGER"]),
     menuController.updateMenu
@@ -47,14 +47,14 @@ router.patch(
 
   router.delete(
     "/:menuId",
-    authenticate,
+    authenticateStaff,
     authorizeRestaurantRole(["OWNER", "MANAGER"]),
     menuController.deleteMenu
   );
 
   router.post(
     "/:menuId/items",
-    authenticate,
+    authenticateStaff,
     validate(createMenuItemSchema),
     authorizeRestaurantRole(["OWNER", "MANAGER"]),
     menuController.createMenuItem
@@ -62,7 +62,7 @@ router.patch(
 
   router.patch(
     "/:menuId/items/:itemId",
-    authenticate,
+    authenticateStaff,
     validate(updateMenuItemSchema),
     authorizeRestaurantRole(["OWNER", "MANAGER"]),
     menuController.updateMenuItem
@@ -70,7 +70,7 @@ router.patch(
   
   router.delete(
     "/:menuId/items/:itemId",
-    authenticate,
+    authenticateStaff,
     authorizeRestaurantRole(["OWNER", "MANAGER"]),
     menuController.deleteMenuItem
   );

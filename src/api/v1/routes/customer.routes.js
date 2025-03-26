@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  authenticate,
+  authenticateStaff,
   authorize,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
@@ -34,7 +34,7 @@ router.post(
 
 router.get(
   "/",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(customerPaginationSchema),
   customerController.getCustomers
@@ -42,7 +42,7 @@ router.get(
 
 router.get(
   "/:customerId",
-  authenticate,
+  authenticateStaff,
   authorize(["ADMIN"]),
   customerController.getCustomerById
 );

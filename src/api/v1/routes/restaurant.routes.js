@@ -1,7 +1,7 @@
 import express from "express";
 import * as restaurantController from "../controllers/restaurant.controller";
 import {
-  authenticate,
+  authenticateStaff,
   authorize,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
@@ -25,19 +25,19 @@ const router = express.Router({ mergeParams: true });
 
 router.get(
   "/",
-  authenticate,
+  authenticateStaff,
   authorize(["ADMIN"]),
   validate(paginationSchema),
   restaurantController.getRestaurants
 );
 
-router.get("/me", authenticate, restaurantController.getUserRestaurants);
+router.get("/me", authenticateStaff, restaurantController.getUserRestaurants);
 
 router.get("/:restaurantId", restaurantController.getRestaurantById);
 
 router.post(
   "/",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
   validate(createRestaurantSchema),
   restaurantController.createRestaurant
@@ -45,7 +45,7 @@ router.post(
 
 router.patch(
   "/:restaurantId",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER"]),
   validate(updateRestaurantSchema),
@@ -54,7 +54,7 @@ router.patch(
 
 router.delete(
   "/:restaurantId",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER"]),
   restaurantController.deleteRestaurant

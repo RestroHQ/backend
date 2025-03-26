@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
@@ -16,7 +16,7 @@ const router = express.Router({ mergeParams: true });
 
 router.post(
   "/orders",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER", "MANAGER", "CASHIER", "WAITER"]),
   validate(createOrderSchema),
   posController.createOrder
@@ -24,7 +24,7 @@ router.post(
 
 router.post(
   "/orders/:orderId/payments",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER", "MANAGER", "CASHIER"]),
   validate(processPaymentSchema),
   posController.processPayment
@@ -32,7 +32,7 @@ router.post(
 
 router.post(
   "/orders/:orderId/void",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(voidOrderSchema),
   posController.voidOrder
@@ -40,7 +40,7 @@ router.post(
 
 router.post(
   "/payments/:paymentId/refund",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(refundPaymentSchema),
   posController.refundPayment

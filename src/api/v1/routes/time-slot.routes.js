@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  authenticate,
+  authenticateStaff,
   authorize,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
@@ -25,7 +25,7 @@ router.get(
 
 router.post(
   "/",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(createTimeSlotSchema),
@@ -34,7 +34,7 @@ router.post(
 
 router.patch(
   "/:timeSlotId",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(updateTimeSlotSchema),

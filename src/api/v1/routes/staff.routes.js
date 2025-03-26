@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  authenticate,
+  authenticateStaff,
   authorize,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
@@ -12,7 +12,7 @@ const router = express.Router({ mergeParams: true });
 
 router.get(
   "",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(paginationSchema),
@@ -21,7 +21,7 @@ router.get(
 
 router.post(
   "",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(addStaffSchema),
@@ -30,7 +30,7 @@ router.post(
 
 router.delete(
   "/:userId",
-  authenticate,
+  authenticateStaff,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   staffController.removeRestaurantStaff

@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
@@ -11,7 +11,7 @@ const router = express.Router({ mergeParams: true });
 
 router.get(
   "/",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(analyticsQuerySchema),
   analyticsController.getRestaurantAnalytics

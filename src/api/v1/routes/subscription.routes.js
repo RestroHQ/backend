@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as subscriptionController from "../controllers/subscription.controller";
 import {
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
@@ -11,14 +11,14 @@ const router = Router({ mergeParams: true });
 
 router.get(
   "/",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER"]),
   subscriptionController.getSubscription
 );
 
 router.post(
   "/",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER"]),
   validate(createCheckoutSessionSchema),
   subscriptionController.createCheckoutSession
@@ -26,14 +26,14 @@ router.post(
 
 router.patch(
   "/",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER"]),
   subscriptionController.updateSubscription
 );
 
 router.delete(
   "/",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER"]),
   subscriptionController.cancelSubscription
 );

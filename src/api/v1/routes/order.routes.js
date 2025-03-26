@@ -1,7 +1,7 @@
 import express from "express";
 import * as orderController from "../controllers/order.controller";
 import {
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
@@ -16,14 +16,14 @@ const router = express.Router({ mergeParams: true });
 
 router.get(
   "/",
-  authenticate,
+  authenticateStaff,
   authorizeRestaurantRole(["OWNER", "MANAGER", "CHEF", "WAITER"]),
   validate(orderQuerySchema),
   orderController.getOrders
 );
 router.post(
     "/",
-    authenticate,
+    authenticateStaff,
     authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
     validate(createOrderSchema),
     orderController.createOrder
@@ -31,7 +31,7 @@ router.post(
   
   router.patch(
     "/:orderId/status",
-    authenticate,
+    authenticateStaff,
     authorizeRestaurantRole(["OWNER", "MANAGER", "CHEF"]),
     validate(updateOrderStatusSchema),
     orderController.updateOrderStatus
