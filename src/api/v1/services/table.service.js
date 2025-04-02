@@ -1,5 +1,13 @@
 import { prisma } from "@/lib/prisma";
 
+export const getTables = async (restaurantId) => {
+  return prisma.table.findMany({
+    where: {
+      restaurantId,
+    },
+  });
+}
+
 export const createTable = async (restaurantId, data) => {
   return prisma.table.create({
     data: {
@@ -27,7 +35,6 @@ export const updateTable = async (id, data) => {
     throw new Error("Table not found");
   }
 
-  // Check if table can be made unavailable
   if (data.isAvailable === false && table.reservations.length > 0) {
     throw new Error(
       "Cannot make table unavailable - has upcoming reservations"
@@ -40,7 +47,11 @@ export const updateTable = async (id, data) => {
   });
 };
 
-export const getAvailableTables = async (restaurantId, timeSlotId, guestCount) => {
+export const getAvailableTables = async (
+  restaurantId,
+  timeSlotId,
+  guestCount
+) => {
   if (!timeSlotId) {
     throw new Error("timeSlotId is required but was not provided");
   }

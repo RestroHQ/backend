@@ -4,7 +4,7 @@ import * as tableService from "../services/table.service";
 export const getTables = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const tables = await tableService.getAllTables(restaurantId);
+    const tables = await tableService.getTables(restaurantId);
 
     if (!tables || tables.length === 0) {
       return res

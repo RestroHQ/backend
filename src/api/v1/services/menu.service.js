@@ -106,17 +106,69 @@ export const createMenu = async (data) => {
 };
 
 export const updateMenu = async (id, data) => {
+  const { menuItems, ...menuData } = data;
+
   const menu = await prisma.menu.update({
     where: { id },
-    data,
+    data: menuData,
     include: {
       menuItems: true,
     },
   });
 
-  generateMenuImageUrls([menu]);
+  if (menuItems) {
+    const existingItems = menu.menuItems;
+    const incomingItems = menuItems;
 
-  return menu;
+    const itemsToDelete = existingItems.filter(
+      (existing) =>
+        !incomingItems.some((incoming) => incoming.id === existing.id)
+    );
+
+    if (itemsToDelete.length > 0) {
+      await prisma.menuItem.deleteMany({
+        where: {
+          id: { in: itemsToDelete.map((item) => item.id) },
+        },
+      });
+    }
+
+    const itemsToCreate = incomingItems.filter((item) => !item.id);
+
+    if (itemsToCreate.length > 0) {
+      await prisma.menuItem.createMany({
+        data: itemsToCreate.map((item) => ({
+          ...item,
+          menuId: id,
+        })),
+      });
+    }
+
+    const itemsToUpdate = incomingItems.filter(
+      (item) =>
+        item.id && existingItems.some((existing) => existing.id === item.id)
+    );
+
+    if (itemsToUpdate.length > 0) {
+      await prisma.$transaction(
+        itemsToUpdate.map((item) =>
+          prisma.menuItem.updateMany({
+            where: { id: item.id },
+            data: item,
+          })
+        )
+      );
+    }
+  }
+
+  const updatedMenu = await prisma.menu.findUnique({
+    where: { id },
+    include: { menuItems: true },
+  });
+
+  generateMenuImageUrls([updatedMenu]);
+
+  return updatedMenu;
 };
 
 export const deleteMenu = async (id) => {
