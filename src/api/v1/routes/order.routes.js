@@ -11,6 +11,7 @@ import {
   updateOrderStatusSchema,
 } from "../schemas/order.schema";
 import { authenticateCustomer } from "../middlewares/customer.middleware";
+import { checkResourceLimit, validateSubscription } from "../middlewares/subscription.middleware";
 
 const router = express.Router({ mergeParams: true });
 
@@ -21,27 +22,30 @@ router.get(
   validate(orderQuerySchema),
   orderController.getOrders
 );
+
 router.post(
-    "/",
-    authenticateStaff,
-    authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
-    validate(createOrderSchema),
-    orderController.createOrder
-  );
-  
-  router.patch(
-    "/:orderId/status",
-    authenticateStaff,
-    authorizeRestaurantRole(["OWNER", "MANAGER", "CHEF"]),
-    validate(updateOrderStatusSchema),
-    orderController.updateOrderStatus
-  );
-  
-  router.post(
-    "/customer",
-    authenticateCustomer,
-    validate(createOrderSchema),
-    orderController.createOrder
-  );
-  
-  export const orderRouter = router;
+  "/",
+  authenticateStaff,
+  authorizeRestaurantRole(["OWNER", "MANAGER", "WAITER"]),
+  validate(createOrderSchema),
+  validateSubscription,
+  checkResourceLimit("orders"),
+  orderController.createOrder
+);
+
+router.patch(
+  "/:orderId/status",
+  authenticateStaff,
+  authorizeRestaurantRole(["OWNER", "MANAGER", "CHEF"]),
+  validate(updateOrderStatusSchema),
+  orderController.updateOrderStatus
+);
+
+router.post(
+  "/customer",
+  authenticateCustomer,
+  validate(createOrderSchema),
+  orderController.createOrder
+);
+
+export const orderRouter = router;

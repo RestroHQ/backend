@@ -10,6 +10,14 @@ import * as tableController from "../controllers/table.controller";
 
 const router = express.Router({ mergeParams: true });
 
+router.get(
+  "/",
+  authenticateStaff,
+  authorize(["USER"]),
+  authorizeRestaurantRole(["OWNER", "MANAGER"]),
+  tableController.getTables
+);
+
 router.post(
   "/",
   authenticateStaff,

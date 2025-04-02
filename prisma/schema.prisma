@@ -142,7 +142,6 @@ model Order {
   voidedBy        String?
 
   items    OrderItem[]
-  payments OrderPayment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -176,31 +175,6 @@ model OrderItem {
   @@index([menuItemId])
 }
 
-model OrderPayment {
-  id             String        @id @default(cuid())
-  orderId        String
-  amount         Decimal       @db.Decimal(10, 2)
-  paymentMethod  PaymentMethod
-  status         PaymentStatus @default(PENDING)
-  paymentType    PaymentType?
-  cardLast4      String?
-  cardType       String?
-  transactionId  String?
-  receiptNumber  String?
-  refundedAmount Decimal?      @db.Decimal(10, 2)
-  refundReason   String?
-  refundedAt     DateTime?
-  refundedBy     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@index([orderId, status])
-  @@index([transactionId])
-  @@index([receiptNumber])
-}
 
 model Table {
   id           String  @id @default(cuid())

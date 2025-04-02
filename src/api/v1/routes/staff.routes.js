@@ -7,11 +7,12 @@ import {
 import { validate } from "../middlewares/validate.middleware";
 import { addStaffSchema, paginationSchema } from "../schemas/staff.schema";
 import * as staffController from "../controllers/staff.controller";
+import { checkResourceLimit, validateSubscription } from "../middlewares/subscription.middleware";
 
 const router = express.Router({ mergeParams: true });
 
 router.get(
-  "",
+  "/",
   authenticateStaff,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
@@ -20,11 +21,13 @@ router.get(
 );
 
 router.post(
-  "",
+  "/",
   authenticateStaff,
   authorize(["USER"]),
   authorizeRestaurantRole(["OWNER", "MANAGER"]),
   validate(addStaffSchema),
+  validateSubscription,
+  checkResourceLimit("staff"),
   staffController.addRestaurantStaff
 );
 

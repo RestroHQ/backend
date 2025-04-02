@@ -38,42 +38,41 @@ router.post(
 );
 
 router.patch(
-    "/:menuId",
-    authenticateStaff,
-    validate(updateMenuSchema),
-    authorizeRestaurantRole(["OWNER", "MANAGER"]),
-    menuController.updateMenu
-  );
+  "/:menuId",
+  authenticateStaff,
+  validate(updateMenuSchema),
+  authorizeRestaurantRole(["OWNER", "MANAGER"]),
+  menuController.updateMenu
+);
 
-  router.delete(
-    "/:menuId",
-    authenticateStaff,
-    authorizeRestaurantRole(["OWNER", "MANAGER"]),
-    menuController.deleteMenu
-  );
+router.delete(
+  "/:menuId",
+  authenticateStaff,
+  authorizeRestaurantRole(["OWNER", "MANAGER"]),
+  menuController.deleteMenu
+);
 
-  router.post(
-    "/:menuId/items",
-    authenticateStaff,
-    validate(createMenuItemSchema),
-    authorizeRestaurantRole(["OWNER", "MANAGER"]),
-    menuController.createMenuItem
-  );
+router.post(
+  "/:menuId/items",
+  authenticateStaff,
+  validate(createMenuItemSchema),
+  authorizeRestaurantRole(["OWNER", "MANAGER"]),
+  menuController.createMenuItem
+);
 
-  router.patch(
-    "/:menuId/items/:itemId",
-    authenticateStaff,
-    validate(updateMenuItemSchema),
-    authorizeRestaurantRole(["OWNER", "MANAGER"]),
-    menuController.updateMenuItem
-  );
-  
-  router.delete(
-    "/:menuId/items/:itemId",
-    authenticateStaff,
-    authorizeRestaurantRole(["OWNER", "MANAGER"]),
-    menuController.deleteMenuItem
-  );
-  
-  export const menuRouter = router;
-  
+router.patch(
+  "/:menuId/items/:itemId",
+  authenticateStaff,
+  validate(updateMenuItemSchema),
+  authorizeRestaurantRole(["OWNER", "MANAGER"]),
+  menuController.updateMenuItem
+);
+
+router.delete(
+  "/:menuId/items/:itemId",
+  authenticateStaff,
+  authorizeRestaurantRole(["OWNER", "MANAGER"]),
+  menuController.deleteMenuItem
+);
+
+export const menuRouter = router;

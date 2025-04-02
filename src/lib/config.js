@@ -13,7 +13,7 @@ export const config = {
   SALT_ROUNDS: process.env.SALT_ROUNDS,
   ADMIN_EMAIL: process.env.ADMIN_EMAIL,
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
-  PAYMENT_ENABLED: Boolean(process.env.PAYMENT_ENABLED),
+  PAYMENT_ENABLED: Boolean(process.env.PAYMENT_ENABLED) || true,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
 };

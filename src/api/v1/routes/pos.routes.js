@@ -11,6 +11,7 @@ import {
   refundPaymentSchema,
 } from "../schemas/pos.schema";
 import * as posController from "../controllers/pos.controller";
+import { checkResourceLimit, validateSubscription } from "../middlewares/subscription.middleware";
 
 const router = express.Router({ mergeParams: true });
 
@@ -19,6 +20,8 @@ router.post(
   authenticateStaff,
   authorizeRestaurantRole(["OWNER", "MANAGER", "CASHIER", "WAITER"]),
   validate(createOrderSchema),
+  validateSubscription,
+  checkResourceLimit("orders"),
   posController.createOrder
 );
 
