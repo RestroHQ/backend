@@ -1,11 +1,8 @@
 import { errorHandler } from "@/lib/error-handler";
 import * as tableService from "../services/table.service";
 
-<<<<<<< Updated upstream
-=======
 export const getTables = async (req, res) => {
   try {
-<<<<<<< Updated upstream
     const { restaurantId } = req.params;
     const tables = await tableService.getAllTables(restaurantId);
 
@@ -16,17 +13,11 @@ export const getTables = async (req, res) => {
     }
 
     res.status(200).json(tables);
-=======
-    const tables = await tableService.getTables(req.params.restaurantId);
-
-    res.json(tables);
->>>>>>> Stashed changes
   } catch (error) {
     errorHandler(error, res);
   }
 };
 
->>>>>>> Stashed changes
 export const createTable = async (req, res) => {
   try {
     const { restaurantId } = req.params;
