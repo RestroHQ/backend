@@ -5,17 +5,16 @@ import {
   authorizeRestaurantRole,
 } from "../middlewares/auth.middleware";
 import { authenticateCustomer } from "../middlewares/customer.middleware";
+import {
+  checkResourceLimit,
+  validateSubscription,
+} from "../middlewares/subscription.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createReservationSchema,
   paginationSchema,
   updateReservationSchema,
 } from "../schemas/reservation.schema";
-import * as reservationController from "../controllers/reservation.controller";
-import {
-  checkResourceLimit,
-  validateSubscription,
-} from "../middlewares/subscription.middleware";
 
 const router = express.Router({ mergeParams: true });
 
