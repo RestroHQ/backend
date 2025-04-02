@@ -11,6 +11,11 @@ import {
   paginationSchema,
   updateReservationSchema,
 } from "../schemas/reservation.schema";
+import * as reservationController from "../controllers/reservation.controller";
+import {
+  checkResourceLimit,
+  validateSubscription,
+} from "../middlewares/subscription.middleware";
 
 const router = express.Router({ mergeParams: true });
 
@@ -26,6 +31,8 @@ router.post(
   "/",
   authenticateCustomer,
   validate(createReservationSchema),
+  validateSubscription,
+  checkResourceLimit("reservations"),
   reservationController.createReservation
 );
 

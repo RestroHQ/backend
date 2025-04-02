@@ -17,12 +17,15 @@ import {
   customerPaginationSchema,
 } from "../schemas/customer.schema";
 import * as customerController from "../controllers/customer.controller";
+import { checkResourceLimit, validateSubscription } from "../middlewares/subscription.middleware";
 
 const router = express.Router({ mergeParams: true });
 
 router.post(
   "/register",
   validate(registerCustomerSchema),
+  validateSubscription,
+  checkResourceLimit("customers"),
   customerController.registerCustomer
 );
 
